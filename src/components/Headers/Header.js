@@ -18,7 +18,7 @@
 
 // reactstrap components
 import { Card, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
-import Reservation from "views/pages/Reservation";
+import Reservation from "views/pages/Reservation/Reservation";
 
 const Header = () => {
   return (
