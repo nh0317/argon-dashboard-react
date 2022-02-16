@@ -96,7 +96,7 @@ console.log(newEvents);
               <Col xl="8">
 
                 <Calendar
-                  popup={false}
+                  //popup={false}
                   events={eventDb}
                   localizer={localizer}
                   defaultView={'day'}
@@ -119,7 +119,7 @@ console.log(newEvents);
                     previous: "<",
                     next: ">",
                   }}
-                  onNavigate={date}
+                  onNavigate={console.log("nextprev)")}
                   components={{
                     timeSlotWrapper: ColoredDateCellWrapper,
                   }}
