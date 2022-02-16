@@ -96,6 +96,7 @@ console.log(newEvents);
               <Col xl="8">
 
                 <Calendar
+                  popup={false}
                   events={eventDb}
                   localizer={localizer}
                   defaultView={'day'}
@@ -117,10 +118,8 @@ console.log(newEvents);
                     today: "오늘",
                     previous: "<",
                     next: ">",
-                    month: "Maand",
-                    week: "Week",
-                    day: "Dag"
                   }}
+                  onNavigate={date}
                   components={{
                     timeSlotWrapper: ColoredDateCellWrapper,
                   }}
@@ -196,7 +195,7 @@ console.log(newEvents);
                       style={{ height: 300 }}
                       //selectable={true}
                       onNavigate={(date)=>{
-                        console.log('#### date=',date)
+                        //console.log('#### date=',date)
                         onSelectDate(date)
                       }}
                     />
@@ -260,7 +259,7 @@ console.log(newEvents);
           </Card>
 
         </Container>
-        
+
     </>
   );
 };
