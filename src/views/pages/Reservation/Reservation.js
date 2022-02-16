@@ -147,14 +147,13 @@ console.log(newEvents);
                   resourceTitleAccessor="resourceTitle"
                   culture={moment.locale('ko-KR')}
                   messages={{
-                    today: "오늘",
+                    //today: "오늘",
                     previous: "<",
                     next: ">",
-                    month: "Maand",
-                    week: "Week",
-                    day: "Dag"
                   }}
+                  style={{ height: 300 }}
               />
+              
                 </Col>
                 
                 <Col lg="10" xl="12">
