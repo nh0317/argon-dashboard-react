@@ -117,25 +117,27 @@ const handleSelect= event=>{
   const [lc, onChangeLc, setLc] =useInput(data.storeLocation);
  
 const onSubmit =event =>{
+  
  const newData= {
-    "storeName": nm,
-    "storeInfo": inf,
-    "storePhoneNumber": pn,
-    "storeBrand": br,
-    "storeLocation": lc,
-    "mainStoreImage": "https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=b9cSTIZa5Tb1y2Bpz1Wpjg&cb_client=search.gws-prod.gps&w=408&h=240&yaw=92.90503&pitch=0&thumbfov=100",
-    "storeImage": [],
-    "storeTime": startTime+" ~ "+endTime,
-    "batCount": bc,
-    "lefthandStatus": lhs,
-    "parkingStatus": ps,
-    "groupSeatStatus": gs,
-    "floorScreenStatus": fss,
-    "storageStatus": ss,
-    "lessonStatus": ls,
-    "reserveStatus": rs,
-    "couponStatus": cs
+  "storeName": nm,
+  "storeInfo": inf,
+  "storePhoneNumber": pn,
+  "storeBrand": br,
+  "storeLocation": lc,
+  "mainStoreImage": "https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=b9cSTIZa5Tb1y2Bpz1Wpjg&cb_client=search.gws-prod.gps&w=408&h=240&yaw=92.90503&pitch=0&thumbfov=100",
+  "storeImage": [],
+  "storeTime": startTime+" ~ "+endTime,
+  "batCount": bc,
+  "lefthandStatus": lhs,
+  "parkingStatus": ps,
+  "groupSeatStatus": gs,
+  "floorScreenStatus": fss,
+  "storageStatus": ss,
+  "lessonStatus": ls,
+  "reserveStatus": rs,
+  "couponStatus": cs
 }
+
 try{
 
   axios.post('/partner/register', newData).then(response => {

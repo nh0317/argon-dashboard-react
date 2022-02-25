@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-
+// storeedit
 export const ReserveStatusContainer=styled.div`
 text-align: left;
 display: block;     
@@ -22,6 +22,16 @@ export const RadioButton = styled.input`
   height: 15px;
   margin: 5px;
   display: inline;
+`
+
+export const CheckBox = styled.input`
+  
+  cursor: pointer;
+  width:16px;
+  height: 16px;
+  margin: 0px 5px 0px 20px;
+  display: inline;
+  vertical-align :text-bottom;
 `
 
 export const CardInfoContainer=styled.div`
@@ -46,4 +56,6 @@ h3{
     font-weight: 600;
 }
 `
+
+//
 

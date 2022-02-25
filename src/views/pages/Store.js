@@ -46,7 +46,7 @@ const Store = () => {
     };
     
     fetchData();
-},[]);
+});
 
   return (
     <>
@@ -74,12 +74,10 @@ const Store = () => {
                   <tr>
 
                     <th scope="row">
-                      <Media className="align-items-center">
-      
+
                           <span className="mb-0 text-sm">
                             매장 이름
                           </span>
-                      </Media>
                     </th>
                     <td> {data.storeName} </td>
                     
@@ -87,14 +85,11 @@ const Store = () => {
                   <tr>
 
                 <th scope="row">
-                  <Media className="align-items-center">
                   
-                    <Media>
                       <span className="mb-0 text-sm">
                         매장 사진
                       </span>
-                    </Media>
-                  </Media>
+                
                 </th>
                 <td> <img src={data.mainStoreImage}/> </td>
 
@@ -103,14 +98,11 @@ const Store = () => {
                 <tr>
 
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
+
       <span className="mb-0 text-sm">
        매장 소개
       </span>
-    </Media>
-  </Media>
+  
 </th>
 <td> {data.storeInfo} </td>
 
@@ -123,14 +115,11 @@ const Store = () => {
    <tr>
 
                     <th scope="row">
-                      <Media className="align-items-center">
-                       
-                        <Media>
+                   
                           <span className="mb-0 text-sm">
                             전화번호
                           </span>
-                        </Media>
-                      </Media>
+                     
                     </th>
                     <td>{data.storePhoneNumber} </td>
                     
@@ -138,14 +127,11 @@ const Store = () => {
                      <tr>
 
                     <th scope="row">
-                      <Media className="align-items-center">
-                       
-                        <Media>
+                 
                           <span className="mb-0 text-sm">
                            주소
                           </span>
-                        </Media>
-                      </Media>
+                   
                     </th>
                     <td> {data.storeLocation} </td>
                     
@@ -153,14 +139,11 @@ const Store = () => {
                   <tr>
 
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
+
       <span className="mb-0 text-sm">
        브랜드
       </span>
-    </Media>
-  </Media>
+  
 </th>
 <td> {data.storeBrand} </td>
 
@@ -169,14 +152,11 @@ const Store = () => {
 <tr>
 
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
+
       <span className="mb-0 text-sm">
         운영시간
       </span>
-    </Media>
-  </Media>
+   
 </th>
 <td> {data.storeTime} </td>
 
@@ -185,14 +165,11 @@ const Store = () => {
 <tr>
 
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
+
       <span className="mb-0 text-sm">
        타석 수
       </span>
-    </Media>
-  </Media>
+   
 </th>
 <td> {data.batCount} </td>
 
@@ -336,11 +313,9 @@ const Store = () => {
 
              tag={NavLinkRRD}
              activeClassName="active"
-            state={data}
           >  
         <Button 
                 color="info"
-                href="#pablo"
               >
                정보 수정
               </Button>
