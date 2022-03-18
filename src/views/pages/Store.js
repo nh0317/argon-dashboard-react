@@ -20,9 +20,12 @@ import {
   Progress,
   Table,
   Container,
+
   Row,Button,
   UncontrolledTooltip,
 } from "reactstrap";
+import * as S from "./style";
+
 
 const Store = () => {
 
@@ -30,6 +33,7 @@ const Store = () => {
 
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
+  const [images, setImages]=useState([]);
 
   useEffect(()=>{
     const fetchData = async () =>{
@@ -39,6 +43,8 @@ const Store = () => {
             
             const response = await axios.get("/partner/myStore");
             setData(response.data.result);
+            setImages(response.data.result.storeImage);
+      
         } catch (e){
             setError(e);
         }
@@ -46,7 +52,7 @@ const Store = () => {
     };
     
     fetchData();
-});
+},[]);
 
   return (
     <>
@@ -87,12 +93,33 @@ const Store = () => {
                 <th scope="row">
                   
                       <span className="mb-0 text-sm">
-                        매장 사진
+                        매장 대표 사진
                       </span>
                 
                 </th>
-                <td> <img src={data.mainStoreImage}/> </td>
+                <td>
+                <S.Image>
 
+                   <img src={data.mainStoreImage}/>
+                   </S.Image>
+             
+                 </td></tr>
+                 <tr>
+<th scope="row">
+  
+      <span className="mb-0 text-sm">
+        매장 전체 사진
+      </span>
+
+  </th>
+<td>
+   <S.Image>
+{images.map((d)=><Media>
+  <img width="300px" src={d}/>
+<br/></Media>
+)}
+           </S.Image> 
+ </td>
                 </tr>
 
                 <tr>
@@ -320,6 +347,11 @@ const Store = () => {
                정보 수정
               </Button>
               </NavLink>
+
+
+
+
+              
                   </Container>
     </>
   );

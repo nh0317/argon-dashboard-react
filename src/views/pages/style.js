@@ -56,6 +56,17 @@ h3{
     font-weight: 600;
 }
 `
+export const Image=styled.div`
 
+display:flex;
+flex-wrap:wrap;
+img{
+width:400px;
+padding:5px;
+
+}
+
+
+`
 //
 
