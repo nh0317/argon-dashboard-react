@@ -30,6 +30,10 @@ const Price = () => {
 
   const [cost, setCost] =useState([]); //주말가격
   const [cost_, setCost_]=useState([]); //평일가격
+  const [cost18, setCost18] =useState([]); //주말가격18
+  const [cost_18, setCost_18]=useState([]); //평일가격18
+
+
   const [costPeriod, setCostPeriod] =useState([]); //특정기간주말가격
   const [costPeriod_, setCostPeriod_] =useState([]); //특정기간평일가격
 
@@ -46,6 +50,9 @@ const Price = () => {
   const[newEdit, setNewEdit]=useState(false); //가격 추가 활성화 idx
   const[periodNewEdit, setPeriodNewEdit]=useState(false); //기간 가격 추가 활성화 idx
 
+
+  const [coupon,setCoupon] = useState([]);
+  const [newCoupon, setNewCoupon] =useState(false);
 
   //newData edit을 위한 값들 (input)
   const[nm, onChangeNm, setNm] =useInput(); //name
@@ -75,14 +82,20 @@ const Price = () => {
               const h = await axios.get("/price/week?isHoliday=true");
               const w = await axios.get("/price/week?isHoliday=false");
 
-              setCost(c1.data.result);
-              setCost_(c1_.data.result);
+              const c = await axios.get(`/stores/coupons?storeIdx=${idx}`);
+
+              setCost(c1.data.result.filter(c=>c.hole==9));
+              setCost_(c1_.data.result.filter(c=>c.hole==9));
+              setCost18(c1.data.result.filter(c=>c.hole==18));
+              setCost_18(c1_.data.result.filter(c=>c.hole==18));
 
               setCostPeriod(c2.data.result);
               setCostPeriod_(c2_.data.result);
 
               setHoli(h.data.result);
               setWeek(w.data.result);
+
+              setCoupon(c.data.result);
 
 
           } catch (e){
@@ -92,7 +105,7 @@ const Price = () => {
           setLoading(false);
       };
       fetchData();
-  },[,eIdx,dayEdit,newEdit,periodNewEdit]);
+  },[,eIdx,dayEdit,newEdit,periodNewEdit,newCoupon]);
 
 
   const  onDayChange=e=>{
@@ -155,6 +168,8 @@ const Price = () => {
    setPeriodNewEdit(false);
 if(e.target.name=="false"){
   const d = cost_.find(c=>c.storePriceIdx==e.target.value);
+  //9홀 18홀 예외처리 추가해야함
+
   setNm(d.name);
   setST(d.startTime);
    setET(d.endTime);
@@ -236,10 +251,12 @@ const onETime= event =>{
 
   }
   const onPriceDel=e=>{
+    console.log(e.target.value);
     axios.delete(`/price/${e.target.value}`).then(response => {
       console.log(response);  
       setEIdx(undefined);
     });
+    window.location.reload();
   }
 
 
@@ -247,9 +264,17 @@ const onETime= event =>{
     if(e.target.name=="default"){
         setNewEdit(true);
         setPeriodNewEdit(false);
+        setNewCoupon(false);
+    }
+    else if(e.target.name=="coupon"){
+      setNewEdit(false);
+      setPeriodNewEdit(false);
+      setNewCoupon(true);
+
     }
     else{
       setNewEdit(false);
+      setNewCoupon(false);
       setPeriodNewEdit(true);
     }
 
@@ -282,12 +307,28 @@ const onSubmitNew = e=>{
 console.log(newData);
 
   axios.post(`/price/register_price`, newData).then(response => {
-   if(response.data.isSuccess)
+   if(response.data.isSuccess){
      setNewEdit(false);
      setPeriodNewEdit(false);
+   }
 
   });
   
+}
+
+const onSubmitCoupon = e=>{
+  const newData ={
+    "couponName": nm,
+    "couponPercentage":bc,
+    "couponDeadline": endDate
+};
+
+  axios.post(`/partner/coupon`, newData).then(response => {
+   if(response.data.isSuccess)
+     setNewCoupon(false);
+
+  });
+
 }
   
   return (
@@ -447,7 +488,7 @@ console.log(newData);
           <div className="col">
             <Card className="shadow">
               <CardHeader className="border-0">
-                <h3 className="mb-0">평일/주말 가격 정보</h3>
+                <h3 className="mb-0">평일/주말 가격 정보 - 18홀</h3>
               </CardHeader>
 
               <Table className="align-items-center table-flush" responsive>
@@ -464,13 +505,13 @@ console.log(newData);
                   </tr>
                 </thead>
                 <tbody>
-                  {cost_.length!=0?
-                    <td  rowSpan={cost_.length+1} width="130">
+                  {cost_18.length!=0?
+                    <td  rowSpan={cost_18.length+1} width="130">
                             평일
                     </td>
                     :null
                     }
-                    {cost_.map(c=>
+                    {cost_18.map(c=>
                         c.storePriceIdx!=eIdx?
                     <tr>
                       <th  width="250">{c.name} </th>
@@ -561,11 +602,11 @@ defaultValue={c.endTime}
 
                    
                     )}
-                    {cost.length!=0?
-                  <td  rowSpan={cost.length+1}>
+                    {cost18.length!=0?
+                  <td  rowSpan={cost18.length+1}>
                            주말
                     </td>:null}
-                    {cost.map(c=>   c.storePriceIdx!=eIdx?
+                    {cost18.map(c=>   c.storePriceIdx!=eIdx?
                     <tr>
                       <th scope="row">{c.name} </th>
                       <th> {c.startTime+" ~ "+c.endTime} </th>
@@ -583,7 +624,6 @@ defaultValue={c.endTime}
               <Button className="btn btn-primary btn-sm"   
                 onClick={e=>onPriceDel(e)}
                 value={c.storePriceIdx}
-
               >
                삭제
               </Button>
@@ -737,6 +777,303 @@ onClick={e=>onHandleSelect(e)}
             </Card>
           </div>
         </Row>
+
+<br/>
+        <Row>
+          <div className="col">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                <h3 className="mb-0">평일/주말 가격 정보 - 9홀</h3>
+              </CardHeader>
+
+              <Table className="align-items-center table-flush" responsive>
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col"> 
+                    구분</th>
+                    <th scope="col">이름 </th>
+                    <th scope="col">시간 </th>
+                    <th scope="col">홀수</th>
+                    <th scope="col">가격 </th>
+                    <th scope="col"> </th>
+
+                  </tr>
+                </thead>
+                <tbody>
+                  {cost_.length!=0?
+                    <td  rowSpan={cost_.length+1} width="130">
+                            평일
+                    </td>
+                    :null
+                    }
+                    {cost_.map(c=>
+                        c.storePriceIdx!=eIdx?
+                    <tr>
+                      <th  width="250">{c.name} </th>
+                      <th width="250"> {c.startTime+" ~ "+c.endTime} </th>
+                      <td width="180"> {c.hole}홀 </td>
+                      <th width="250"> {c.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}원</th>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                onClick={e=>onPriceEdit(e)}
+                value={c.storePriceIdx}
+                name="false"
+              >
+               편집
+              </Button>
+              <Button 
+              className="btn btn-primary btn-sm"   
+                onClick={e=>onPriceDel(e)}
+                value={c.storePriceIdx}
+              >
+               삭제
+              </Button>
+              </th>   
+                    </tr>:
+                    <tr>
+                    <th  width="250">
+                   {c.name}</th>
+                    <th width="250">
+                      
+<input 
+className="btn btn-secondary btn-sm"
+type="time"
+value={startTime} 
+onChange={e=>onTime(e)}
+defaultValue={c.startTime}
+/>
+~
+
+<input 
+className="btn btn-secondary btn-sm"
+type="time"
+value={endTime} 
+onChange={e=>onETime(e)}
+defaultValue={c.endTime}
+/>
+                      
+                      
+               </th>
+                    <td width="180"> 
+                    <Input
+                            className="form-control-alternative"
+                            type="number"
+                            onChange={onChangeBc}
+                            value={bc}
+                            defaultValue={c.hole}
+                            placeholder="홀"
+                          /> 
+                           </td>
+                    <th width="250">
+                    <Input
+                            className="form-control-alternative"
+                            type="number"
+                            onChange={onChangePrice}
+                            value={price}
+                            defaultValue={c.price}
+                            placeholder="가격"
+
+                          /> 
+                     </th>
+                    <th> 
+      <Button className="btn btn-primary btn-sm"   
+              color="info"
+              onClick={e=>onPriceEditDone(e)}
+              value={c.storePriceIdx}
+            >
+             완료
+            </Button>
+            <Button 
+            className="btn btn-primary btn-sm"   
+              onClick={e=>onPriceDel(e)}
+              value={c.storePriceIdx}
+
+            >
+             삭제
+            </Button>
+            </th>   
+                  </tr>
+
+                   
+                    )}
+                    {cost.length!=0?
+                  <td  rowSpan={cost.length+1}>
+                           주말
+                    </td>:null}
+                    {cost.map(c=>   c.storePriceIdx!=eIdx?
+                    <tr>
+                      <th scope="row">{c.name} </th>
+                      <th> {c.startTime+" ~ "+c.endTime} </th>
+                      <td> {c.hole}홀 </td>
+                      <th> {c.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}원</th>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                onClick={e=>onPriceEdit(e)}
+                value={c.storePriceIdx}
+                name="true"
+              >
+               편집
+              </Button>
+              <Button className="btn btn-primary btn-sm"   
+                onClick={e=>onPriceDel(e)}
+                value={c.storePriceIdx}
+              >
+               삭제
+              </Button>
+              
+              </th>    
+                    </tr>
+                      :
+                      <tr>
+                      <th  width="250">
+                     {c.name}</th>
+                      <th width="250">
+                        
+  <input 
+  className="btn btn-secondary btn-sm"
+  type="time"
+  value={startTime} 
+  onChange={e=>onTime(e)}
+  defaultValue={c.startTime}
+  />
+  ~
+  
+  <input 
+  className="btn btn-secondary btn-sm"
+  type="time"
+  value={endTime} 
+  onChange={e=>onETime(e)}
+  defaultValue={c.endTime}
+  />
+                        
+                        
+                 </th>
+                      <td width="250"> 
+                      <Input
+                              className="form-control-alternative"
+                              type="number"
+                              onChange={onChangeBc}
+                              value={bc}
+                              defaultValue={c.hole}
+                              placeholder="홀"
+                            /> 
+                             </td>
+                      <th width="250">
+                      <Input
+                              className="form-control-alternative"
+                              type="number"
+                              onChange={onChangePrice}
+                              value={price}
+                              defaultValue={c.price}
+                              placeholder="가격"
+  
+                            /> 
+                       </th>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                onClick={e=>onPriceEditDone(e)}
+                value={c.storePriceIdx}
+              >
+               완료
+              </Button>
+              <Button 
+              className="btn btn-primary btn-sm"   
+                onClick={e=>onPriceDel(e)}
+                value={c.storePriceIdx}
+
+              >
+               삭제
+              </Button>
+              </th>   
+                    </tr>
+                      )}
+
+
+{newEdit==true?
+       
+<tr>
+<th>
+<select class="form-control form-control-alternative mr-0"
+onClick={e=>onHandleSelect(e)}
+>
+  <option value="false">평일</option>
+  <option value="true">주말</option>
+
+</select>
+  </th>  
+                      <th  width="250">
+                      <Input
+                              className="form-control-alternative"
+                              type="text"
+                              onChange={onChangeNm}
+                              value={nm}
+                              placeholder="이름"
+  
+                            /> 
+                     </th>
+                      <th width="250">
+                        
+  <input 
+  className="btn btn-secondary btn-sm"
+  type="time"
+  value={startTime} 
+  onChange={e=>onTime(e)}
+  />
+  ~
+  
+  <input 
+  className="btn btn-secondary btn-sm"
+  type="time"
+  value={endTime} 
+  onChange={e=>onETime(e)}
+  />
+                        
+                        
+                 </th>
+                      <td width="250"> 
+                      <Input
+                              className="form-control-alternative"
+                              type="number"
+                              onChange={onChangeBc}
+                              value={bc}
+                              placeholder="홀"
+                            /> 
+                             </td>
+                      <th width="250">
+                      <Input
+                              className="form-control-alternative"
+                              type="number"
+                              onChange={onChangePrice}
+                              value={price}
+                              placeholder="가격"
+  
+                            /> 
+                       </th>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                onClick={e=>onSubmitNew(e)}
+              >
+               완료
+              </Button>
+        <Button className="btn btn-primary btn-sm"   
+                onClick={e=>setNewEdit(false)}
+              >
+               취소
+              </Button>
+              </th>   
+                    </tr>
+:null}
+                </tbody>
+              </Table>
+            </Card>
+          </div>
+        </Row>
+
+
         {newEdit==false?
         <Button className="mt-2 mb-4"   
                 color="info"
@@ -1113,6 +1450,107 @@ onClick={e=>onHandleSelect(e)}
               null}
         <br/>
         
+
+        
+
+       <Row>
+          <div className="col">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                <h3 className="mb-0">쿠폰 관리</h3>
+              </CardHeader>
+              <Table className="align-items-center table-flush" responsive>
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col"> 이름</th>
+                    <th scope="col">퍼센트 </th>
+                    <th scope="col">다운 가능 기간 </th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                    {coupon.map(c=>
+                      <tr key={c.couponIdx}>
+                      <th>{c.couponName} </th>
+                      <th> {c.couponPercentage}% </th>
+                      <td>  ~ {c.couponDeadline} </td>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                value={c.couponIdx}
+              >
+               편집
+              </Button>
+              <Button 
+              className="btn btn-primary btn-sm"   
+                value={c.couponIdx}
+              >
+               삭제
+              </Button>
+              </th>   
+                    </tr>)}
+{ newCoupon == true?
+       
+<tr>
+
+                      <th  width="250">
+                      <Input
+                              className="form-control-alternative"
+                              type="text"
+                              onChange={onChangeNm}
+                              value={nm}
+                              placeholder="이름"
+                            /> 
+                     </th>
+                  
+                      <td width="250"> 
+                      <Input
+                              className="form-control-alternative"
+                              type="number"
+                              onChange={onChangeBc}
+                              value={bc}
+                              placeholder="%"
+                            /> 
+                             </td>
+                      <th>
+
+                   ~   <input class="form-control-alternative m-2" 
+type="date" 
+value={endDate}
+ onChange={e=>  setED(e.target.value) }
+
+/>
+                       </th>
+                      <th> 
+        <Button className="btn btn-primary btn-sm"   
+                color="info"
+                onClick={e=>onSubmitCoupon(e)}
+              >
+               완료
+              </Button>
+        <Button className="btn btn-primary btn-sm"   
+                onClick={e=>setNewCoupon(false)}
+              >
+               취소
+              </Button>
+              </th>   
+                    </tr>
+:null }
+                </tbody>
+              </Table>
+            </Card>
+          </div>
+        </Row>
+        {newCoupon==false?
+        <Button className="mt-2 mb-4"   
+                color="info"
+                onClick={e=>onNewPrice(e)}
+                name="coupon"
+              >
+              쿠폰 추가
+              </Button>:
+              null}
+        <br/>
         
         </Container>
     </>

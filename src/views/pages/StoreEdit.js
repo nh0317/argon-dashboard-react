@@ -28,15 +28,37 @@ import {
 } from "reactstrap";
 
 const StoreEdit = ( props ) => {
-console.log(props.location.state.data);
+//console.log(props.location.state.data);
 
-const [data, setData] = useState(props.location.state.data);
-//const [data, setData] = useState([]);
+//const [data, setData] = useState(props.location.state.data);
+const [data2, setData2] = useState([]);
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
   
   const [brands, setBrands]=useState([]);
+    const [storeImage, setStoreImage]=useState([]);
+
     
+  const [nm, onChangeNm, setNm] = useInput();
+  const [inf, onChangeInf, setInf] =useInput();
+  const [pn, onChangePn, setPn] =useInput();
+  const[bc, onChangeBc, setBc] =useInput();
+  const [br, setBr] =useState();
+  const [startTime, setST] =useState();
+  const [endTime, setET] =useState();
+  const [fss, setFss] =useState();
+  const [ss, setSs] =useState();
+  const [ps, setPs] =useState();
+  const [lhs, setLhs] =useState();
+  const [gs, setGs] =useState();
+  const [ls, setLs] =useState();
+  const [rs, setRs] =useState();
+  const [cs, setCs] =useState();
+  const [lc, onChangeLc, setLc] =useInput();
+  //for files
+  const [main, setMain]=useState();
+  const [images, setImages]=useState([]);
+
   useEffect(()=>{
     const fetchData = async () =>{
         try {
@@ -45,7 +67,30 @@ const [data, setData] = useState(props.location.state.data);
             
             const response = await axios.get("/stores/brand");
             setBrands(response.data.result);
-
+            const d = await axios.get("/partner/myStore");
+            setData2(d.data.result);
+            setNm(d.data.result.storeName);
+            setInf(d.data.result.storeInfo);
+            setPn(d.data.result.storePhoneNumber);
+            setBc(d.data.result.batCount);
+            setBr(d.data.result.storeBrand);
+            const str = d.data.result.storeTime.split(" ");
+            if(str[2].split(":")[0]==24){
+             str[2]="00:"+str[2].split(":")[1];
+            }
+            setST(str[0]);
+            setET(str[2]);
+            setFss(d.data.result.floorScreenStatus);
+            setSs(d.data.result.storageStatus);
+            setPs(d.data.result.parkingStatus);
+            setLhs(d.data.result.lefthandStatus);
+            setGs(d.data.result.groupSeatStatus);
+            setLs(d.data.result.lessonStatus);
+            setRs(d.data.result.reserveStatus);
+            setCs(d.data.result.couponStatus);
+           setLc(d.data.result.storeLocation);
+           setStoreImage(d.data.result.storeImage);
+         
         } catch (e){
             setError(e);
         }
@@ -94,29 +139,70 @@ const handleSelect= event=>{
     setCs(value);
 }
 
-  const [nm, onChangeNm, setNm] = useInput(data.storeName);
-  const [inf, onChangeInf, setInf] =useInput(data.storeInfo);
-  const [pn, onChangePn, setPn] =useInput(data.storePhoneNumber);
-  const[bc, onChangeBc, setBc] =useInput(data.batCount);
-  const [br, setBr] =useState(data.storeBrand);
-  const str = data.storeTime.split(" ");
-  if(str[2].split(":")[0]==24){
-   str[2]="00:"+str[2].split(":")[1];
+  const onHandleImage=e=>{
+    e.preventDefault();
+    const formData = new FormData();
+    
+    //대표
+    formData.append(
+      "mainStoreImage",
+      main
+    );
+
+    formData.append(
+      "storeImages",
+      main
+    );
+    
+    const config = {
+      headers: {
+        "content-type": "multipart/form-data"
+      }
+    };
+   
+    try{
+      //main, images 하나의 formData로 묶어서
+      axios.post('/partner/register_image', formData).then(response => {
+      console.log(response);
+      window.location.reload();
+
+    });
+    }catch(e){
+      console.log(e);
+    }
+    
+
   }
-  const [startTime, setST] =useState(str[0]);
-  const [endTime, setET] =useState(str[2]);
-  const [fss, setFss] =useState(data.floorScreenStatus);
-  const [ss, setSs] =useState(data.storageStatus);
-  const [ps, setPs] =useState(data.parkingStatus);
-  const [lhs, setLhs] =useState(data.lefthandStatus);
-  const [gs, setGs] =useState(data.groupSeatStatus);
-  const [ls, setLs] =useState(data.lessonStatus);
-  const [rs, setRs] =useState(data.reserveStatus);
-  const [cs, setCs] =useState(data.couponStatus);
+    const onHandleImages=e=>{
+      const formData = new FormData();
+    
+    //전체
+    for(let i=0; i<images.length;i++){
+      formData.append(
+        "storeImages",
+        images[i]);
+      }
+      
+      const config = {
+        headers: {
+          "content-type": "multipart/form-data"
+        }
+      };
+   
+try{
+  axios.post('/partner/register_image', formData).then(response => {
+  console.log(response);
+  window.location.reload();
+
+      
+  });
+}catch(e){
+  console.log(e);
+}
 
 
-  const [lc, onChangeLc, setLc] =useInput(data.storeLocation);
- 
+  }
+
 const onSubmit =event =>{
   
  const newData= {
@@ -147,10 +233,11 @@ try{
   });
 }catch(e){
   console.log(e);
-}
+}}
 
 
-}
+
+
 
   return (
     <>
@@ -196,20 +283,64 @@ try{
                     
                   </tr>
                   <tr>
-
-                <th scope="row">
-                  <Media className="align-items-center">
+                  <th scope="row">
                   
-                    <Media>
-                      <span className="mb-0 text-sm">
-                        매장 사진
-                      </span>
-                    </Media>
-                  </Media>
-                </th>
-                <td> <img src={data.mainStoreImage}/> </td>
+                  <span className="mb-0 text-sm">
+                    매장 대표 사진
+                  </span>
+            
+            </th>
+            <td>
+            <S.Image>
 
-                </tr>
+               <img src={data2.mainStoreImage}/>
+               </S.Image>
+
+               <Input type="file" class="form-control"
+                onChange={e=>setMain(e.target.files[0])}
+                />
+        <Button
+        onClick={e=>onHandleImage(e)} 
+                color="info">
+               변경
+              </Button>
+
+
+
+             </td></tr>
+             <tr>
+<th scope="row">
+
+  <span className="mb-0 text-sm">
+    매장 전체 사진
+  </span>
+
+</th>
+<td>
+<S.Image>
+{storeImage.map((d)=><Media>
+<img width="300px" src={d}/>
+<Button
+class="form-control sm">
+               삭제
+              </Button>
+<br/></Media>
+)}
+       </S.Image> 
+       <Input type="file" class="form-control"
+                multiple
+                onChange={e=>setImages(e.target.files)}
+                />
+        <Button
+        onClick={e=>onHandleImages(e)} 
+                color="info">
+               사진 추가
+              </Button>
+
+
+</td>
+            </tr>
+         
 
                 <tr>
 
@@ -395,7 +526,7 @@ onChange={e=>onETime(e)}
           type="radio"
            value="true"
            name="fss"
-           defaultChecked={fss===true?true:false}
+           defaultChecked={fss==true?true:false}
            onChange={e=>handleSelect(e)}
            />
            <h3>O</h3>
@@ -404,7 +535,7 @@ onChange={e=>onETime(e)}
           type="radio"
            value="false"
            name="fss"
-           defaultChecked={fss===false?true:false}
+           defaultChecked={fss==false?true:false}
            onChange={e=>handleSelect(e)}     
                  /><h3>X</h3>         
 </S.ReserveStatusContainer>
