@@ -1,3 +1,8 @@
+import React, {useState,useEffect} from "react";
+import { Link, Redirect,useHistory } from "react-router-dom";
+import axios from "axios"
+
+import useInput from "../../hooks/useInput"
 import {
     Button,
     Card,
@@ -13,58 +18,82 @@ import {
     Col,
   } from "reactstrap";
   
+  
   const Signin = () => {
+    const history = useHistory();
+ 
+    const [id, onChangeId, setId] =useInput("");
+    const [pw, onChangePw, setPw] =useInput("");
+
+
+    const [err0, setErr0] = useState("");
+
+    const onLogin = (e) => {
+        e.preventDefault();
+        console.log(e);
+        
+        const data = {
+            "id" : id,
+            "password" : pw
+        };
+
+        try{
+
+        axios.post('/partner/login', data).then(
+        onLoginSuccess)
+        .catch(error => {
+            setErr0("로그인에 실패했습니다.");
+            console.log(error);
+        })
+    }catch(e){
+        console.log(e);
+    }}
+
+    const onSilentRefresh = () => {
+const response =         axios.post('/users/refresh');
+console.log(response);
+            onLoginSuccess(response);
+    }
+    
+    const onLoginSuccess = response => {
+     
+        console.log(response);
+
+                const  accessToken  = response.data.result.jwt;
+                const jwtValidity = response.data.result.jwtValidity;
+
+                
+                // API 요청하는 콜마다 헤더에 accessToken 담아 보내도록 설정
+                axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;    
+                setTimeout(onSilentRefresh, jwtValidity * 1000 - 60000);
+  // accessToken 만료하기 1분 전에 로그인 연장
+  
+                const code = response.data.code;
+                if(code==2000 || code==3000 || code==3010){
+                    setErr0("로그인에 실패했습니다.");
+                }
+                else if (code==2030){
+                    setErr0("비밀번호가 틀렸습니다. 비밀번호를 다시 입력해주세요.");
+                }
+                else{
+                    history.push("/admin/dashboard");
+                }      
+
+
+      }
     return (
       <>
         <Col lg="5" md="7">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-5">
+            <CardHeader className="bg-transparent pb-3">
               <div className="text-muted text-center mt-2 mb-3">
-                <h1>로그인페이지입니다!</h1>
-                <small>Sign in with</small>
-              </div>
-              <div className="btn-wrapper text-center">
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={
-                        require("../../assets/img/icons/common/github.svg")
-                          .default
-                      }
-                    />
-                  </span>
-                  <span className="btn-inner--text">Github</span>
-                </Button>
-                <Button
-                  className="btn-neutral btn-icon"
-                  color="default"
-                  href="#pablo"
-                  onClick={(e) => e.preventDefault()}
-                >
-                  <span className="btn-inner--icon">
-                    <img
-                      alt="..."
-                      src={
-                        require("../../assets/img/icons/common/google.svg")
-                          .default
-                      }
-                    />
-                  </span>
-                  <span className="btn-inner--text">Google</span>
-                </Button>
+                <h1>관리자 로그인</h1>
+                <small>매장 관리를 위한 로그인 페이지입니다.</small>
               </div>
             </CardHeader>
             <CardBody className="px-lg-5 py-lg-5">
-              <div className="text-center text-muted mb-4">
-                <small>Or sign in with credentials</small>
-              </div>
-              <Form role="form">
+              <Form role="form"
+              onSubmit={onLogin}>
                 <FormGroup className="mb-3">
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
@@ -73,9 +102,11 @@ import {
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
-                      placeholder="Email"
+                      placeholder="이메일"
                       type="email"
-                      autoComplete="new-email"
+                      value={id}
+                      onChange={onChangeId}
+                      required     
                     />
                   </InputGroup>
                 </FormGroup>
@@ -87,28 +118,28 @@ import {
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input
-                      placeholder="Password"
+                     placeholder="비밀번호"
+                     value={pw}
+                    onChange={onChangePw}
+                    required
                       type="password"
-                      autoComplete="new-password"
                     />
                   </InputGroup>
                 </FormGroup>
                 <div className="custom-control custom-control-alternative custom-checkbox">
-                  <input
-                    className="custom-control-input"
-                    id=" customCheckLogin"
-                    type="checkbox"
-                  />
+                  
                   <label
                     className="custom-control-label"
-                    htmlFor=" customCheckLogin"
                   >
-                    <span className="text-muted">Remember me</span>
+                      {err0}
                   </label>
                 </div>
                 <div className="text-center">
-                  <Button className="my-4" color="primary" type="button">
-                    Sign in
+                  <Button className="my-4" color="primary"
+                  type="submit"
+                  disabled={!id || !pw}
+                  >
+                  로그인
                   </Button>
                 </div>
               </Form>
