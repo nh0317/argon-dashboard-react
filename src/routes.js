@@ -97,6 +97,7 @@ var routes = [
     component: Signup,
     layout: "/auth",
   },
+  /*
  
   {
     path: "/icons",
@@ -147,5 +148,6 @@ var routes = [
     component: Register,
     layout: "/auth",
   },
+  */
 ];
 export default routes;

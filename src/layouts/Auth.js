@@ -61,18 +61,11 @@ const Auth = (props) => {
   return (
     <>
       <div className="main-content" ref={mainContent}>
-        <AuthNavbar />
         <div className="header bg-gradient-info py-7 py-lg-8">
           <Container>
-            <div className="header-body text-center mb-7">
+            <div className="header-body text-center mb-2">
               <Row className="justify-content-center">
-                <Col lg="5" md="6">
-                  <h1 className="text-white">로그인이 필요합니다!</h1>
-                  <p className="text-lead text-light">
-                    Use these awesome forms to login or create new account in
-                    your project for free.
-                  </p>
-                </Col>
+              
               </Row>
             </div>
           </Container>
