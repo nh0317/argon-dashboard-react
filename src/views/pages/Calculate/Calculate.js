@@ -23,6 +23,7 @@ import { TableSearch, TableHeader, TableCalculateHeader, TableCalculate, TableCa
 const Styles = styled.div`
   padding: 1rem;
 
+  
   table {
     width: 100%;
     border-spacing: 0;
