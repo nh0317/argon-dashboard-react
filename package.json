@@ -23,6 +23,7 @@
     "url": "https://github.com/creativetimofficial/argon-dashboard-react/issues"
   },
   "homepage": "https://demos.creative-tim.com/argon-dashboard-react/",
+  "proxy": "http://seoul.naturemobility.com:18080/",
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
@@ -49,6 +50,7 @@
     "@fortawesome/fontawesome-free": "5.15.3",
     "@mui/lab": "^5.0.0-alpha.69",
     "@mui/material": "^5.4.2",
+    "axios": "^0.26.1",
     "bootstrap": "4.6.0",
     "chart.js": "2.9.4",
     "classnames": "2.3.1",
@@ -60,7 +62,7 @@
     "node-sass-package-importer": "5.3.2",
     "nouislider": "15.2.0",
     "react": "^17.0.2",
-    "react-big-calendar": "^0.38.6",
+    "react-big-calendar": "^0.38.9",
     "react-chartjs-2": "2.11.1",
     "react-copy-to-clipboard": "5.0.3",
     "react-datepicker": "^4.6.0",
