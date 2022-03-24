@@ -128,20 +128,24 @@ console.log(response);
                 </FormGroup>
                 <div className="custom-control custom-control-alternative custom-checkbox">
                   
-                  <label
-                    className="custom-control-label"
-                  >
+                  <h5>
                       {err0}
-                  </label>
+                  </h5>
                 </div>
                 <div className="text-center">
-                  <Button className="my-4" color="primary"
+                  <Button className="mb-5" color="primary" 
                   type="submit"
                   disabled={!id || !pw}
                   >
                   로그인
                   </Button>
                 </div>
+                <div className="text-center"
+                onClick={e=>history.push("/auth/signup")}
+                >
+                <h5>처음이세요? 회원가입 페이지로</h5>
+                </div>
+
               </Form>
             </CardBody>
           </Card>
@@ -161,7 +165,7 @@ console.log(response);
                 href="#pablo"
                 onClick={(e) => e.preventDefault()}
               >
-                <small>Create new account</small>
+                <small> .</small>
               </a>
             </Col>
           </Row>

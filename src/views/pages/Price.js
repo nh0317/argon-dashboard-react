@@ -47,7 +47,10 @@ const Price = () => {
 
   const[dayEdit, setDayEdit]=useState(false); //요일 설정 활성화
   const[eIdx, setEIdx]=useState(null); //가격 편집 활성화 idx
+
   const[newEdit, setNewEdit]=useState(false); //가격 추가 활성화 idx
+  const[newEdit18, setNewEdit18]=useState(false);//가격 18 추가 활성화 idx
+  
   const[periodNewEdit, setPeriodNewEdit]=useState(false); //기간 가격 추가 활성화 idx
 
 
@@ -73,7 +76,7 @@ const Price = () => {
               const i = await axios.get("/partner/get_storeIdx");
               const idx= i.data.result.storeIdx;
               console.log(idx);
-              //idx로 불러오는 부분 수정이 필요함 
+
                const c1 = await axios.get(`/price/${idx}/week_price?isHoliday=true`);
                const c1_ = await axios.get(`/price/${idx}/week_price?isHoliday=false`)
                const c2 = await axios.get(`/price/${idx}/period_price?isHoliday=true`);
@@ -105,7 +108,7 @@ const Price = () => {
           setLoading(false);
       };
       fetchData();
-  },[,eIdx,dayEdit,newEdit,periodNewEdit,newCoupon]);
+  },[,eIdx,dayEdit,newEdit,newEdit18,periodNewEdit,newCoupon]);
 
 
   const  onDayChange=e=>{
@@ -168,15 +171,26 @@ const Price = () => {
    setPeriodNewEdit(false);
 if(e.target.name=="false"){
   const d = cost_.find(c=>c.storePriceIdx==e.target.value);
-  //9홀 18홀 예외처리 추가해야함
-
+  //9홀 평일
   setNm(d.name);
   setST(d.startTime);
    setET(d.endTime);
    setSD(d.startDate);
    setED(d.endDate);
    setPrice(d.price);
-   setBc(d.hole);
+   setBc(9);
+   setIsHoli(d.isHoliday);
+}
+else if(e.target.name=="false_18"){
+  const d = cost_18.find(c=>c.storePriceIdx==e.target.value);
+  //18홀 평일
+  setNm(d.name);
+  setST(d.startTime);
+   setET(d.endTime);
+   setSD(d.startDate);
+   setED(d.endDate);
+   setPrice(d.price);
+   setBc(18);
    setIsHoli(d.isHoliday);
 }
 else if(e.target.name=="true"){ //주말
@@ -187,7 +201,20 @@ else if(e.target.name=="true"){ //주말
    setSD(d.startDate);
    setED(d.endDate);
    setPrice(d.price);
-   setBc(d.hole);
+   setBc(9);
+   setIsHoli(d.isHoliday);
+
+}
+
+else if(e.target.name=="true_18"){ //주말 18
+  const d = cost18.find(c=>c.storePriceIdx==e.target.value);
+  setNm(d.name);
+  setST(d.startTime);
+   setET(d.endTime);
+   setSD(d.startDate);
+   setED(d.endDate);
+   setPrice(d.price);
+   setBc(18);
    setIsHoli(d.isHoliday);
 
 }
@@ -258,25 +285,18 @@ const onETime= event =>{
     });
     window.location.reload();
   }
+  const onCouponDel=e=>{
+    axios.delete(`/partner/coupon/${e.target.value}`).then(response => {
+      console.log(response);  
+      setEIdx(undefined);
+    });
+    window.location.reload();
+  }
+
 
 
   const onNewPrice=e=>{
-    if(e.target.name=="default"){
-        setNewEdit(true);
-        setPeriodNewEdit(false);
-        setNewCoupon(false);
-    }
-    else if(e.target.name=="coupon"){
-      setNewEdit(false);
-      setPeriodNewEdit(false);
-      setNewCoupon(true);
-
-    }
-    else{
-      setNewEdit(false);
-      setNewCoupon(false);
-      setPeriodNewEdit(true);
-    }
+    
 
     setNm(null);
   setST(null);
@@ -287,6 +307,33 @@ const onETime= event =>{
    setBc(null);
    setIsHoli(false);
         setEIdx(null);
+    if(e.target.name=="default"){
+        setNewEdit(true);
+        setNewEdit18(false);
+        setPeriodNewEdit(false);
+        setNewCoupon(false);
+        setBc(9);
+    }
+    else if(e.target.name=="default18"){
+      setNewEdit(false);
+      setNewEdit18(true);
+      setPeriodNewEdit(false);
+      setBc(18);
+      setNewCoupon(false);
+    }
+    else if(e.target.name=="coupon"){
+      setNewEdit(false);
+      setNewEdit18(false);
+      setPeriodNewEdit(false);
+      setNewCoupon(true);
+
+    }
+    else{
+      setNewEdit(false);
+      setNewEdit18(false);
+      setNewCoupon(false);
+      setPeriodNewEdit(true);
+    }
   }
       
 const onHandleSelect=e=>{
@@ -523,7 +570,7 @@ const onSubmitCoupon = e=>{
                 color="info"
                 onClick={e=>onPriceEdit(e)}
                 value={c.storePriceIdx}
-                name="false"
+                name="false_18"
               >
                편집
               </Button>
@@ -561,14 +608,7 @@ defaultValue={c.endTime}
                       
                </th>
                     <td width="180"> 
-                    <Input
-                            className="form-control-alternative"
-                            type="number"
-                            onChange={onChangeBc}
-                            value={bc}
-                            defaultValue={c.hole}
-                            placeholder="홀"
-                          /> 
+                   {bc} 홀
                            </td>
                     <th width="250">
                     <Input
@@ -617,7 +657,7 @@ defaultValue={c.endTime}
                 color="info"
                 onClick={e=>onPriceEdit(e)}
                 value={c.storePriceIdx}
-                name="true"
+                name="true_18"
               >
                편집
               </Button>
@@ -656,14 +696,7 @@ defaultValue={c.endTime}
                         
                  </th>
                       <td width="250"> 
-                      <Input
-                              className="form-control-alternative"
-                              type="number"
-                              onChange={onChangeBc}
-                              value={bc}
-                              defaultValue={c.hole}
-                              placeholder="홀"
-                            /> 
+                    {bc} 홀
                              </td>
                       <th width="250">
                       <Input
@@ -697,7 +730,7 @@ defaultValue={c.endTime}
                       )}
 
 
-{newEdit==true?
+{newEdit18==true?
        
 <tr>
 <th>
@@ -739,13 +772,7 @@ onClick={e=>onHandleSelect(e)}
                         
                  </th>
                       <td width="250"> 
-                      <Input
-                              className="form-control-alternative"
-                              type="number"
-                              onChange={onChangeBc}
-                              value={bc}
-                              placeholder="홀"
-                            /> 
+                     {bc} 홀
                              </td>
                       <th width="250">
                       <Input
@@ -765,7 +792,7 @@ onClick={e=>onHandleSelect(e)}
                완료
               </Button>
         <Button className="btn btn-primary btn-sm"   
-                onClick={e=>setNewEdit(false)}
+                onClick={e=>setNewEdit18(false)}
               >
                취소
               </Button>
@@ -778,7 +805,18 @@ onClick={e=>onHandleSelect(e)}
           </div>
         </Row>
 
-<br/>
+        {newEdit18==false?
+        <Button className="mt-2 mb-4"   
+                color="info"
+                onClick={e=>onNewPrice(e)}
+                name="default18"
+              >
+               18홀 가격 추가
+              </Button>:
+              null}
+        <br/>
+
+
         <Row>
           <div className="col">
             <Card className="shadow">
@@ -856,14 +894,7 @@ defaultValue={c.endTime}
                       
                </th>
                     <td width="180"> 
-                    <Input
-                            className="form-control-alternative"
-                            type="number"
-                            onChange={onChangeBc}
-                            value={bc}
-                            defaultValue={c.hole}
-                            placeholder="홀"
-                          /> 
+{bc} 홀
                            </td>
                     <th width="250">
                     <Input
@@ -951,14 +982,7 @@ defaultValue={c.endTime}
                         
                  </th>
                       <td width="250"> 
-                      <Input
-                              className="form-control-alternative"
-                              type="number"
-                              onChange={onChangeBc}
-                              value={bc}
-                              defaultValue={c.hole}
-                              placeholder="홀"
-                            /> 
+                      {bc} 홀
                              </td>
                       <th width="250">
                       <Input
@@ -1034,13 +1058,8 @@ onClick={e=>onHandleSelect(e)}
                         
                  </th>
                       <td width="250"> 
-                      <Input
-                              className="form-control-alternative"
-                              type="number"
-                              onChange={onChangeBc}
-                              value={bc}
-                              placeholder="홀"
-                            /> 
+                      {bc} 홀
+
                              </td>
                       <th width="250">
                       <Input
@@ -1080,7 +1099,7 @@ onClick={e=>onHandleSelect(e)}
                 onClick={e=>onNewPrice(e)}
                 name="default"
               >
-               평일/주말 가격 추가
+               9홀 가격 추가
               </Button>:
               null}
         <br/>
@@ -1475,15 +1494,10 @@ onClick={e=>onHandleSelect(e)}
                       <th> {c.couponPercentage}% </th>
                       <td>  ~ {c.couponDeadline} </td>
                       <th> 
-        <Button className="btn btn-primary btn-sm"   
-                color="info"
-                value={c.couponIdx}
-              >
-               편집
-              </Button>
               <Button 
               className="btn btn-primary btn-sm"   
                 value={c.couponIdx}
+                onClick={e=>onCouponDel(e)}
               >
                삭제
               </Button>
