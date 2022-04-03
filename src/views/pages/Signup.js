@@ -158,9 +158,7 @@ import {
                     />
                   </InputGroup>
                 </FormGroup>
-                <h5
-                    className="custom-control-label"
-                  >{err1}</h5>
+                <h5>{err1}</h5>
             
                   
                 <div className="text-center">

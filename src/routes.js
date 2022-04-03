@@ -32,6 +32,7 @@ import Review from "views/pages/Review.js";
 import Signin from "views/pages/Signin";
 import Signup from "views/pages/Signup";
 import StoreEdit from "views/pages/StoreEdit";
+import Refund from "views/pages/Refund";
 var routes = [
   {
     path: "/dashboard",
@@ -45,6 +46,13 @@ var routes = [
     name: "예약 관리",
     icon: "ni ni-calendar-grid-58",
     component: Reservation,
+    layout: "/admin",
+  },
+  {
+    path: "/refund",
+    name: "환불 관리",
+    icon: "ni ni-archive-2",
+    component: Refund,
     layout: "/admin",
   },
   {

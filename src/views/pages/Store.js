@@ -216,7 +216,7 @@ const Store = () => {
 <tr >
 <th scope="row">
    
-      <span className="mb-0">
+      <span className="ml-3">
        바닥 스크린
       </span>
    
@@ -231,7 +231,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       장비 보관 
       </span>
 </th>
@@ -244,7 +244,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       주차 시설
       </span>
 </th>
@@ -257,11 +257,11 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
      왼손 전용
       </span>
 </th>
-{data.leftHandsatus?
+{data.lefthandStatus?
   <td> 
    O</td>:
   <td> 
@@ -270,7 +270,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       그룹 석 
       </span>
 </th>
@@ -283,8 +283,8 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
-      레쓴 제공
+      <span className="ml-3">
+      레슨 제공
       </span>
 </th>
 {data.lessonStatus?

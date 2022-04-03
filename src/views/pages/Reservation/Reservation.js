@@ -17,7 +17,6 @@ const Reservation = () => {
 
   const [day, setDay] = useState({dateObj});
 
-  const [refunds, setRefunds]=useState([]);
   const [error, setError]=useState();
   const [loading, setLoading]=useState();
 
@@ -292,101 +291,6 @@ console.log(re);
             </CardBody>
 
           </Card>
-
-
-<br/>
-          <Row>
-          <div className="col">
-            <Card className="shadow">
-              <CardHeader className="border-0">
-                <h3 className="mb-0">취소 요청 중 예약 관리</h3>
-              </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col"> 
-                    idx</th>
-                    <th scope="col">merchantUid </th>
-                    <th scope="col">유저명 </th>
-                    <th scope="col">예약 시간</th>
-                    <th scope="col">가격 </th>
-                    <th scope="col">취소 사유</th>
-                    <th scope="col">상태 </th>
-                    <th scope="col"> </th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {refunds.filter(r=>r.refundStatus!=="환불 완료").map(r=>
-                    <tr>
-                      <th  width="40">{r.reservationIdx} </th>
-                      <th width="200"> {r.merchantUid} </th>
-                      <td width="100"> {r.userName} </td>
-                      <th width="180"> {r.reservationTime} </th>
-                      <th width="180"> {r.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}원 </th>
-                      <td width="200"> {r.refundReason} </td>
-                      <td width="180"> {r.refundStatus} </td>
-                      <th> 
-        <Button className="btn btn-primary btn-sm"   
-                color="info"
-                onClick={e=>onRefund(e)}
-                name={r.reservationIdx}
-                value={r.amount}
-              >
-               환불 수락
-              </Button>
-              </th>   
-                    </tr>
-                    )}
-                </tbody>
-              </Table>
-            </Card>
-          </div>
-        </Row>
-
-
-
-        <br/>
-          <Row>
-          <div className="col">
-            <Card className="shadow">
-              <CardHeader className="border-0">
-                <h3 className="mb-0">취소 완료된 예약</h3>
-              </CardHeader>
-              <Table className="align-items-center table-flush" responsive>
-                <thead className="thead-light">
-                  <tr>
-                    <th scope="col"> 
-                    idx</th>
-                    <th scope="col">merchantUid </th>
-                    <th scope="col">유저명 </th>
-                    <th scope="col">예약 시간</th>
-                    <th scope="col">가격 </th>
-                    <th scope="col">취소 사유</th>
-                    <th scope="col">상태 </th>
-                    <th scope="col"> </th>
-                  </tr>
-                </thead>
-                <tbody>
-                    {refunds.filter(r=>r.refundStatus==="환불 완료").map(r=>
-                  
-                    <tr>
-                      <th  width="40">{r.reservationIdx} </th>
-                      <th width="200"> {r.merchantUid} </th>
-                      <td width="100"> {r.userName} </td>
-                      <th width="180"> {r.reservationTime} </th>
-                      <th width="180"> {r.amount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}원 </th>
-                      <td width="200"> {r.refundReason} </td>
-                      <td width="180"> {r.refundStatus} </td>
-                      <th> 
-
-              </th>   
-                    </tr>
-                    )}
-                </tbody>
-              </Table>
-            </Card>
-          </div>
-        </Row>
 
         </Container>
 
