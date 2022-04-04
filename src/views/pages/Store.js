@@ -34,6 +34,8 @@ const Store = () => {
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
   const [images, setImages]=useState([]);
+  const [roomData, setRoomData] =useState([]);
+  const [bc, setBc] =useState(0);
 
   useEffect(()=>{
     const fetchData = async () =>{
@@ -41,10 +43,17 @@ const Store = () => {
             setError(null);
             setLoading(true);
             
-            const response = await axios.get("/partner/myStore");
-            setData(response.data.result);
-            setImages(response.data.result.storeImage);
-      
+            const d1 = await axios.get("/partner/myStore");
+            setData(d1.data.result);
+            setImages(d1.data.result.storeImage);
+            const i = await axios.get("/partner/get_storeIdx");
+            const idx= i.data.result.storeIdx;
+            const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
+            setRoomData(d2.data.result);
+            d2.data.result.map(d=>{
+            setBc(prev=>prev+d.roomIdx.length);
+            });
+
         } catch (e){
             setError(e);
         }
@@ -108,7 +117,7 @@ const Store = () => {
 <th scope="row">
   
       <span className="mb-0 text-sm">
-        매장 전체 사진
+       추가 사진
       </span>
 
   </th>
@@ -188,19 +197,51 @@ const Store = () => {
 <td> {data.storeTime} </td>
 
 </tr>
-
 <tr>
-
 <th scope="row">
-
-      <span className="mb-0 text-sm">
-       타석 수
+        <span className="mb-0 text-sm">
+       방 관리
       </span>
-   
 </th>
-<td> {data.batCount} </td>
+<td>
+                <Card className="mt-2">
+              <Table>
+                <thead>
+                  <th width="100">방 종류</th><th>방 현황</th>
+                </thead>
+                <tbody>
+                  {roomData.map(d=>
+                     <tr>
+                     <th>
+                    {d.roomName}
+                     </th>
+                     <td>
+                       {d.roomIdx.map(i=>
+                       <span className="mr-3">
+                         {d.roomName}{i}
+                       </span>
+                       )}
+                     </td>
+                   </tr>
+                    )}
+               
+                </tbody>
+              </Table>
+              </Card>
+
+                          </td>
 
 </tr>
+
+<tr>
+<th scope="row">
+        <span className="mb-0 text-sm">
+      총 타석 수
+      </span>
+</th>
+<td> {bc} </td>
+</tr>
+
 <tr >
 
 <th scope="row">
@@ -216,7 +257,7 @@ const Store = () => {
 <tr >
 <th scope="row">
    
-      <span className="mb-0">
+      <span className="ml-3">
        바닥 스크린
       </span>
    
@@ -231,7 +272,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       장비 보관 
       </span>
 </th>
@@ -244,7 +285,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       주차 시설
       </span>
 </th>
@@ -257,11 +298,11 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
      왼손 전용
       </span>
 </th>
-{data.leftHandsatus?
+{data.lefthandStatus?
   <td> 
    O</td>:
   <td> 
@@ -270,7 +311,7 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       그룹 석 
       </span>
 </th>
@@ -283,8 +324,8 @@ const Store = () => {
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
-      레쓴 제공
+      <span className="ml-3">
+      레슨 제공
       </span>
 </th>
 {data.lessonStatus?

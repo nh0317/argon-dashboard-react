@@ -27,25 +27,28 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 
-const StoreEdit = ( props ) => {
-//console.log(props.location.state.data);
-
-//const [data, setData] = useState(props.location.state.data);
-const [data2, setData2] = useState([]);
+const StoreEdit = ( ) => {
+  const [data2, setData2] = useState([]);
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
   
-  const [brands, setBrands]=useState([]);
-    const [storeImage, setStoreImage]=useState([]);
+  const [reload,setReload]=useState(1);
 
+  const [brands, setBrands]=useState([]);
+  const [storeImage, setStoreImage]=useState([]);
     
   const [nm, onChangeNm, setNm] = useInput();
   const [inf, onChangeInf, setInf] =useInput();
   const [pn, onChangePn, setPn] =useInput();
-  const[bc, onChangeBc, setBc] =useInput();
+  const[bc, onChangeBc, setBc] =useInput(0);
+  const[room, onChangeRoom, setRoom]=useInput();
+  const[roomCount, onChangRoomCount, setRoomCount] =useInput();
+  const[roomData, setRoomData]=useState([]);
+
   const [br, setBr] =useState();
   const [startTime, setST] =useState();
   const [endTime, setET] =useState();
+
   const [fss, setFss] =useState();
   const [ss, setSs] =useState();
   const [ps, setPs] =useState();
@@ -68,11 +71,11 @@ const [data2, setData2] = useState([]);
             const response = await axios.get("/stores/brand");
             setBrands(response.data.result);
             const d = await axios.get("/partner/myStore");
+            console.log(d);
             setData2(d.data.result);
             setNm(d.data.result.storeName);
             setInf(d.data.result.storeInfo);
             setPn(d.data.result.storePhoneNumber);
-            setBc(d.data.result.batCount);
             setBr(d.data.result.storeBrand);
             const str = d.data.result.storeTime.split(" ");
             if(str[2].split(":")[0]==24){
@@ -89,7 +92,18 @@ const [data2, setData2] = useState([]);
             setRs(d.data.result.reserveStatus);
             setCs(d.data.result.couponStatus);
            setLc(d.data.result.storeLocation);
-           setStoreImage(d.data.result.storeImage);
+          
+           const i = await axios.get("/partner/get_storeIdx");
+           const idx= i.data.result.storeIdx;
+           
+           const im = await axios.get(`/stores/images/${idx}`)
+           setStoreImage(im.data.result);
+           
+           const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
+           setRoomData(d2.data.result);
+           d2.data.result.map(d=>{
+            setBc(prev=>prev+d.roomIdx.length);
+          });
          
         } catch (e){
             setError(e);
@@ -98,7 +112,7 @@ const [data2, setData2] = useState([]);
     };
     
     fetchData();
-},[]);
+},[,reload]);
 
 const onDrop= event =>{
   const value = (event.target.value);
@@ -118,26 +132,6 @@ const onETime= event =>{
   console.log(value);
   setET(value);
 }
-const handleSelect= event=>{
-  
-  const value = (event.target.value);
-  if(event.target.name=="fss")
-    setFss(value);
-  else if(event.target.name=="ss")
-    setSs(value);
-  else if(event.target.name=="ps")
-    setPs(value);
-  else if(event.target.name=="lhs")
-    setLhs(value);
-  else if(event.target.name=="gs")
-    setGs(value);
-  else if(event.target.name=="ls")
-    setLs(value);
-  else if(event.target.name=="rs")
-    setRs(value);
-  else if(event.target.name=="cs")
-    setCs(value);
-}
 
   const onHandleImage=e=>{
     e.preventDefault();
@@ -149,11 +143,6 @@ const handleSelect= event=>{
       main
     );
 
-    formData.append(
-      "storeImages",
-      main
-    );
-    
     const config = {
       headers: {
         "content-type": "multipart/form-data"
@@ -161,15 +150,14 @@ const handleSelect= event=>{
     };
    
     try{
-      //main, images 하나의 formData로 묶어서
       axios.post('/partner/register_image', formData).then(response => {
-      console.log(response);
-      window.location.reload();
+     // window.location.reload();
 
     });
     }catch(e){
       console.log(e);
     }
+    setReload(reload+1);
     
 
   }
@@ -192,9 +180,7 @@ const handleSelect= event=>{
 try{
   axios.post('/partner/register_image', formData).then(response => {
   console.log(response);
-  window.location.reload();
-
-      
+  setReload(reload+1);
   });
 }catch(e){
   console.log(e);
@@ -202,6 +188,32 @@ try{
 
 
   }
+
+  
+  const onDeleteImage=e=>{ 
+      axios.delete(`/partner/image/${e.target.value}`).then(response => {
+        console.log(response);  
+
+    })
+    setReload(reload+1);
+  }
+
+  const onRoom=e=>{
+    const newData ={
+      "roomName" : room,
+      "count":roomCount
+    }
+    axios.post("/partner/room",newData).then(response=>{
+      console.log(response);
+      setReload(reload+1);
+    });
+  }
+const onDelRoom=e=>{
+  axios.delete(`/partner/room?roomIdx=${e.target.value}`).then(response=>{
+    console.log(response);
+    setReload(reload+1);
+  })
+}
 
 const onSubmit =event =>{
   
@@ -211,7 +223,6 @@ const onSubmit =event =>{
   "storePhoneNumber": pn,
   "storeBrand": br,
   "storeLocation": lc,
-  "mainStoreImage": "https://streetviewpixels-pa.googleapis.com/v1/thumbnail?panoid=b9cSTIZa5Tb1y2Bpz1Wpjg&cb_client=search.gws-prod.gps&w=408&h=240&yaw=92.90503&pitch=0&thumbfov=100",
   "storeImage": [],
   "storeTime": startTime+" ~ "+endTime,
   "batCount": bc,
@@ -225,6 +236,7 @@ const onSubmit =event =>{
   "couponStatus": cs
 }
 
+console.log(newData);
 try{
 
   axios.post('/partner/register', newData).then(response => {
@@ -282,64 +294,7 @@ try{
                        </td>
                     
                   </tr>
-                  <tr>
-                  <th scope="row">
-                  
-                  <span className="mb-0 text-sm">
-                    매장 대표 사진
-                  </span>
-            
-            </th>
-            <td>
-            <S.Image>
-
-               <img src={data2.mainStoreImage}/>
-               </S.Image>
-
-               <Input type="file" class="form-control"
-                onChange={e=>setMain(e.target.files[0])}
-                />
-        <Button
-        onClick={e=>onHandleImage(e)} 
-                color="info">
-               변경
-              </Button>
-
-
-
-             </td></tr>
-             <tr>
-<th scope="row">
-
-  <span className="mb-0 text-sm">
-    매장 전체 사진
-  </span>
-
-</th>
-<td>
-<S.Image>
-{storeImage.map((d)=><Media>
-<img width="300px" src={d}/>
-<Button
-class="form-control sm">
-               삭제
-              </Button>
-<br/></Media>
-)}
-       </S.Image> 
-       <Input type="file" class="form-control"
-                multiple
-                onChange={e=>setImages(e.target.files)}
-                />
-        <Button
-        onClick={e=>onHandleImages(e)} 
-                color="info">
-               사진 추가
-              </Button>
-
-
-</td>
-            </tr>
+                 
          
 
                 <tr>
@@ -386,8 +341,6 @@ class="form-control sm">
                             className="form-control-alternative"
                             type="tel"
                             required
-                            pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
-                            maxlength="12"
                             onChange={onChangePn}
                             value={pn}
                           /> </td>
@@ -479,25 +432,76 @@ onChange={e=>onETime(e)}
    </td>
 
 </tr>
+<tr>
+<th scope="row">
+        <span className="mb-0 text-sm">
+       방 관리
+      </span>
+</th>
+<td>
+<Input style={{display:"inline-block", width:"200px"}}
+                            className="form-control-alternative mr-3"
+                            type="text"
+                            onChange={onChangeRoom}
+                            placeholder="방 이름"
+                            value={room}
+                          /> 
+ 
+ <Input style={{display:"inline-block", width:"100px"}}
+                            className="form-control-alternative mr-3"
+                            type="number"
+                            placeholder="개수"
+                            onChange={onChangRoomCount}
+                            value={roomCount}
+                          /> 
+                              <Button
+        onClick={e=>onRoom(e)} 
+                color="primary">
+               방 추가
+              </Button>
+                <Card className="mt-2">
+              <Table>
+                <thead>
+                  <th width="100">방 종류</th><th>방 현황</th>
+                </thead>
+                <tbody>
+                  {roomData.map(d=>
+                     <tr>
+                     <th>
+                    {d.roomName}
+                     </th>
+                     <td>
+                       <div style={{width:"200px"}}>
+                       {d.roomIdx.map(i=>
+                       <span className="mr-3">
+                         {d.roomName}{i}
+                         <button className="btn btn-outline-secondary btn-sm"
+              value={i}
+              onClick={e=>onDelRoom(e)}
+              >
+                 [ - ]              </button>  
+                       </span>
+                       )}
+                       </div>
+                     </td>
+                   </tr>
+                    )}
+               
+                </tbody>
+              </Table>
+              </Card>
+
+                          </td>
+
+</tr>
 
 <tr>
-
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
-      <span className="mb-0 text-sm">
-       타석 수
+        <span className="mb-0 text-sm">
+      총 타석 수
       </span>
-    </Media>
-  </Media>
 </th>
-<td>  <Input
-                            className="form-control-alternative"
-                            type="number"
-                            onChange={onChangeBc}
-                            value={bc}
-                          /> </td>
+<td> {bc} </td>
 
 </tr>
 <tr >
@@ -514,29 +518,25 @@ onChange={e=>onETime(e)}
 
 <tr >
 <th scope="row">
-   
-      <span className="mb-0">
+      <span className="ml-3">
        바닥 스크린
       </span>
-   
 </th>
 <td>
     <S.ReserveStatusContainer>                     
-<S.RadioButton
+    <S.RadioButton
           type="radio"
-           value="true"
+           defaultChecked={fss}
            name="fss"
-           defaultChecked={fss==true?true:false}
-           onChange={e=>handleSelect(e)}
+           onClick={e=>setFss(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
+           defaultChecked={!fss}
            name="fss"
-           defaultChecked={fss==false?true:false}
-           onChange={e=>handleSelect(e)}     
+           onClick={e=>setFss(false)}
                  /><h3>X</h3>         
 </S.ReserveStatusContainer>
 
@@ -546,27 +546,24 @@ onChange={e=>onETime(e)}
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       장비 보관 
       </span>
 </th>
   <td>  <S.ReserveStatusContainer>                     
   <S.RadioButton
             type="radio"
-             value="true"
-             name="ss"
-             onChange={e=>handleSelect(e)}
-             defaultChecked={ss===true?true:false}
-
+            defaultChecked={ss}
+            name="ss"
+            onClick={e=>setSs(true)}
              />
              <h3>O</h3>
                
              <S.RadioButton
             type="radio"
-             value="false"
-             name="ss"
-             defaultChecked={ss===false?true:false}
-             onChange={e=>handleSelect(e)}     
+            defaultChecked={!ss}
+            name="ss"
+            onClick={e=>setSs(false)}   
                    /><h3>X</h3>         
   </S.ReserveStatusContainer>
   </td>
@@ -574,7 +571,7 @@ onChange={e=>onETime(e)}
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       주차 시설
       </span>
 </th>
@@ -582,98 +579,87 @@ onChange={e=>onETime(e)}
   <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
            name="ps"
-           defaultChecked={ps===true?true:false}
-
-           onChange={e=>handleSelect(e)}
+           defaultChecked={ps}
+           onClick={e=>setPs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
            name="ps"
-           defaultChecked={ps===false?true:false}
-           onChange={e=>handleSelect(e)}     
+           defaultChecked={!ps}
+           onClick={e=>setPs(false)}     
                  /><h3>X</h3>         
 </S.ReserveStatusContainer></td> 
    </tr>
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
      왼손 전용
       </span>
 </th> <td> 
   <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
            name="lhs"
-           defaultChecked={lhs===true?true:false}
-           onChange={e=>handleSelect(e)}
+           defaultChecked={lhs}
+           onClick={()=>setLhs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
            name="lhs"
-           defaultChecked={lhs===false?true:false}
-           onChange={e=>handleSelect(e)}     
-                 /><h3>X</h3>         
+           defaultChecked={!lhs}
+           onClick={()=>setLhs(false)}     
+/><h3>X</h3>         
 </S.ReserveStatusContainer></td> 
    </tr>
 
    <tr >
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       그룹 석 
       </span>
 </th><td> 
   <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
            name="gs"
-           defaultChecked={gs===true?true:false}
-
-           onChange={e=>handleSelect(e)}
+           defaultChecked={gs}
+           onClick={e=>setGs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
            name="gs"
-           defaultChecked={gs===false?true:false}
-           onChange={e=>handleSelect(e)}     
+           defaultChecked={!gs}
+           onClick={e=>setGs(false)}     
                  /><h3>X</h3>         
 </S.ReserveStatusContainer></td></tr>
 <tr>
 <th scope="row">
-      <span className="mb-0">
+      <span className="ml-3">
       레슨 제공
       </span>
 </th>
   <td> <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
+           defaultChecked={ls}
            name="ls"
-           defaultChecked={ls===true?true:false}
-
-           onChange={e=>handleSelect(e)}
+           onClick={e=>setLs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
            name="ls"
-           defaultChecked={ls===false?true:false}
-           onChange={e=>handleSelect(e)}     
+           defaultChecked={!ls}
+           onClick={e=>setLs(false)}     
                  /><h3>X</h3>         
 </S.ReserveStatusContainer> </td>  
    </tr>
@@ -687,19 +673,17 @@ onChange={e=>onETime(e)}
     <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
+           defaultChecked={rs}
            name="rs"
-           defaultChecked={rs===true?true:false}
-           onChange={e=>handleSelect(e)}
+           onClick={e=>setRs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
-           name="rs"
-           defaultChecked={rs===false?true:false}
-           onChange={e=>handleSelect(e)}     
+          defaultChecked={!rs}
+          name="rs"
+           onClick={e=>setRs(false)}     
                  /><h3>X</h3>         
 </S.ReserveStatusContainer>
 </td>  
@@ -714,20 +698,19 @@ onChange={e=>onETime(e)}
     <S.ReserveStatusContainer>                     
 <S.RadioButton
           type="radio"
-           value="true"
            name="cs"
-           defaultChecked={cs===true?true:false}
-           onChange={e=>handleSelect(e)}
+           defaultChecked={cs}
+           onClick={e=>setCs(true)}
            />
            <h3>O</h3>
              
            <S.RadioButton
           type="radio"
-           value="false"
            name="cs"
-           defaultChecked={cs===false?true:false}
-           onChange={e=>handleSelect(e)}     
-                 /><h3>X</h3>         
+           defaultChecked={!cs}
+           onClick={e=>setCs(false)}     
+                 />
+                 <h3>X</h3>         
 </S.ReserveStatusContainer></td>
    </tr>
  
@@ -739,27 +722,99 @@ onChange={e=>onETime(e)}
             </Card>
           </div>
         </Row>
-        
-        
-       
-        
-   <br/>
-   <NavLink
-             to=
-             {{
-               pathname:"/admin/store"
-              }}
-             tag={NavLinkRRD}
-             activeClassName="active"
-             onClick={e=>onSubmit(e)}
-          >  
+         
+  
         <Button 
+                     onClick={e=>onSubmit(e)}
                 color="info"
 
                 >
-               수정 완료
+               정보 수정
               </Button>
-             </NavLink>
+        <br/><br/>
+        <Row>
+        <div className="col">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                <h3 className="mb-0">매장 사진 관리</h3>
+              </CardHeader>
+              <Table className="align-items-center table-flush" responsive>
+
+                <thead className="thead-light">
+                  <tr>
+                    <th scope="col"> </th>
+                    <th scope="col"> </th>
+                  
+                  </tr>
+                </thead>
+                <tbody>
+          <tr>
+                  <th scope="row">
+                  
+                  <span className="mb-0 text-sm">
+                    매장 대표 사진
+                  </span>
+            
+            </th>
+            <td>
+            <S.Image>
+
+               <img src={data2.mainStoreImage}/>
+               </S.Image>
+
+               <Input type="file" class="form-control"
+                onChange={e=>setMain(e.target.files[0])}
+                />
+        <Button
+        onClick={e=>onHandleImage(e)} 
+                color="info">
+               변경
+              </Button>
+
+
+
+             </td></tr>
+             <tr>
+<th scope="row">
+
+  <span className="mb-0 text-sm">
+    추가 사진
+  </span>
+
+</th>
+<td>
+<S.Image>
+{storeImage.map((d)=><Media key={d.imgFileIdx}>
+<img width="300px" src={d.storeImage}/>
+<Button
+value={d.imgFileIdx}
+onClick={e=>onDeleteImage(e)}
+class="form-control sm">
+               삭제
+              </Button>
+<br/></Media>
+)}
+       </S.Image> 
+       <Input type="file" class="form-control"
+                multiple
+                onChange={e=>setImages(e.target.files)}
+                />
+        <Button
+        onClick={e=>onHandleImages(e)} 
+                color="info">
+               사진 추가
+              </Button>
+
+
+</td>
+            </tr>
+            </tbody>
+            </Table>
+        </Card>
+        </div>
+        </Row>
+       
+       
       </Container>
     </>
   );
