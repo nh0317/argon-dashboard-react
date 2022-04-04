@@ -27,23 +27,24 @@ import {
   UncontrolledTooltip,
 } from "reactstrap";
 
-const StoreEdit = ( props ) => {
-//console.log(props.location.state.data);
-
-const [data2, setData2] = useState([]);
+const StoreEdit = ( ) => {
+  const [data2, setData2] = useState([]);
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
   
   const [reload,setReload]=useState(1);
 
   const [brands, setBrands]=useState([]);
-    const [storeImage, setStoreImage]=useState([]);
-
+  const [storeImage, setStoreImage]=useState([]);
     
   const [nm, onChangeNm, setNm] = useInput();
   const [inf, onChangeInf, setInf] =useInput();
   const [pn, onChangePn, setPn] =useInput();
-  const[bc, onChangeBc, setBc] =useInput();
+  const[bc, onChangeBc, setBc] =useInput(0);
+  const[room, onChangeRoom, setRoom]=useInput();
+  const[roomCount, onChangRoomCount, setRoomCount] =useInput();
+  const[roomData, setRoomData]=useState([]);
+
   const [br, setBr] =useState();
   const [startTime, setST] =useState();
   const [endTime, setET] =useState();
@@ -75,7 +76,6 @@ const [data2, setData2] = useState([]);
             setNm(d.data.result.storeName);
             setInf(d.data.result.storeInfo);
             setPn(d.data.result.storePhoneNumber);
-            setBc(d.data.result.batCount);
             setBr(d.data.result.storeBrand);
             const str = d.data.result.storeTime.split(" ");
             if(str[2].split(":")[0]==24){
@@ -92,7 +92,18 @@ const [data2, setData2] = useState([]);
             setRs(d.data.result.reserveStatus);
             setCs(d.data.result.couponStatus);
            setLc(d.data.result.storeLocation);
-           setStoreImage(d.data.result.storeImage);
+          
+           const i = await axios.get("/partner/get_storeIdx");
+           const idx= i.data.result.storeIdx;
+           
+           const im = await axios.get(`/stores/images/${idx}`)
+           setStoreImage(im.data.result);
+           
+           const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
+           setRoomData(d2.data.result);
+           d2.data.result.map(d=>{
+            setBc(prev=>prev+d.roomIdx.length);
+          });
          
         } catch (e){
             setError(e);
@@ -169,9 +180,7 @@ const onETime= event =>{
 try{
   axios.post('/partner/register_image', formData).then(response => {
   console.log(response);
-  window.location.reload();
-
-      
+  setReload(reload+1);
   });
 }catch(e){
   console.log(e);
@@ -182,16 +191,29 @@ try{
 
   
   const onDeleteImage=e=>{ 
-    /*
       axios.delete(`/partner/image/${e.target.value}`).then(response => {
         console.log(response);  
 
     })
-    */
-   // window.location.reload();
-    
+    setReload(reload+1);
   }
 
+  const onRoom=e=>{
+    const newData ={
+      "roomName" : room,
+      "count":roomCount
+    }
+    axios.post("/partner/room",newData).then(response=>{
+      console.log(response);
+      setReload(reload+1);
+    });
+  }
+const onDelRoom=e=>{
+  axios.delete(`/partner/room?roomIdx=${e.target.value}`).then(response=>{
+    console.log(response);
+    setReload(reload+1);
+  })
+}
 
 const onSubmit =event =>{
   
@@ -319,8 +341,6 @@ try{
                             className="form-control-alternative"
                             type="tel"
                             required
-                            pattern="[0-9]{2,3}-[0-9]{3,4}-[0-9]{4}"
-                            maxlength="12"
                             onChange={onChangePn}
                             value={pn}
                           /> </td>
@@ -412,25 +432,76 @@ onChange={e=>onETime(e)}
    </td>
 
 </tr>
+<tr>
+<th scope="row">
+        <span className="mb-0 text-sm">
+       방 관리
+      </span>
+</th>
+<td>
+<Input style={{display:"inline-block", width:"200px"}}
+                            className="form-control-alternative mr-3"
+                            type="text"
+                            onChange={onChangeRoom}
+                            placeholder="방 이름"
+                            value={room}
+                          /> 
+ 
+ <Input style={{display:"inline-block", width:"100px"}}
+                            className="form-control-alternative mr-3"
+                            type="number"
+                            placeholder="개수"
+                            onChange={onChangRoomCount}
+                            value={roomCount}
+                          /> 
+                              <Button
+        onClick={e=>onRoom(e)} 
+                color="primary">
+               방 추가
+              </Button>
+                <Card className="mt-2">
+              <Table>
+                <thead>
+                  <th width="100">방 종류</th><th>방 현황</th>
+                </thead>
+                <tbody>
+                  {roomData.map(d=>
+                     <tr>
+                     <th>
+                    {d.roomName}
+                     </th>
+                     <td>
+                       <div style={{width:"200px"}}>
+                       {d.roomIdx.map(i=>
+                       <span className="mr-3">
+                         {d.roomName}{i}
+                         <button className="btn btn-outline-secondary btn-sm"
+              value={i}
+              onClick={e=>onDelRoom(e)}
+              >
+                 [ - ]              </button>  
+                       </span>
+                       )}
+                       </div>
+                     </td>
+                   </tr>
+                    )}
+               
+                </tbody>
+              </Table>
+              </Card>
+
+                          </td>
+
+</tr>
 
 <tr>
-
 <th scope="row">
-  <Media className="align-items-center">
-   
-    <Media>
-      <span className="mb-0 text-sm">
-       타석 수
+        <span className="mb-0 text-sm">
+      총 타석 수
       </span>
-    </Media>
-  </Media>
 </th>
-<td>  <Input
-                            className="form-control-alternative"
-                            type="number"
-                            onChange={onChangeBc}
-                            value={bc}
-                          /> </td>
+<td> {bc} </td>
 
 </tr>
 <tr >
@@ -652,7 +723,6 @@ onChange={e=>onETime(e)}
           </div>
         </Row>
          
-   <br/>
   
         <Button 
                      onClick={e=>onSubmit(e)}
@@ -661,8 +731,7 @@ onChange={e=>onETime(e)}
                 >
                정보 수정
               </Button>
-        
-        <br/>
+        <br/><br/>
         <Row>
         <div className="col">
             <Card className="shadow">
@@ -715,11 +784,11 @@ onChange={e=>onETime(e)}
 </th>
 <td>
 <S.Image>
-{storeImage.map((d,index)=><Media>
-<img width="300px" src={d}/>
+{storeImage.map((d)=><Media key={d.imgFileIdx}>
+<img width="300px" src={d.storeImage}/>
 <Button
+value={d.imgFileIdx}
 onClick={e=>onDeleteImage(e)}
-value={index}
 class="form-control sm">
                삭제
               </Button>

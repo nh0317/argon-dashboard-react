@@ -86,36 +86,6 @@ console.log(newEvents);
     { resourceId: 7, resourceTitle: 'SG 7' },
   ]
 
-  useEffect(()=>{
-    const fetchData = async () =>{
-        try {
-            setError(null);
-            setLoading(true);
-
-             const refund = await axios.get("/pay/refund-list");
-            setRefunds(refund.data.result);
-        } catch (e){
-            console.log(e);
-            setError(e);
-        }
-        setLoading(false);
-    };
-    fetchData();
-},[]);
-
-const onRefund=e=>{
-  const re= 
-  {
-    "reservationIdx":Number(e.target.name),
-    "cancelAmount":Number(e.target.value)
-};
-console.log(re);
-  axios.post("/pay/approve_refund",re).then(response => {
-    console.log(response);  
-  });
-//  window.location.reload();
-}
-
 
   return (
     <>

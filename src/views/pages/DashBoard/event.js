@@ -2,8 +2,8 @@ export default [
     {
       'title': 'All Day Event very long title',
       'allDay': true,
-      'start': new Date(2022, 1, 1),
-      'end': new Date(2022, 1, 10)
+      'start': new Date("2022-04-04"),
+      'end': new Date("2022-04-04"),
     },
     {
       'title': 'Long Event',
