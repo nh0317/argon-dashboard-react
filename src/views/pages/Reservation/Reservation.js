@@ -1,4 +1,5 @@
 import React, {useCallback, useState, useEffect} from "react";
+import { useHistory, useLocation, withRouter } from 'react-router-dom';
 import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, CardGroup,Table,Button } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import style from "views/pages/DashBoard/style";
@@ -6,14 +7,16 @@ import {Calendar, momentLocalizer} from 'react-big-calendar'
 import moment from 'moment'
 import axios from "axios"
 import 'react-big-calendar/lib/css/react-big-calendar.css';
-//import Firebase from 'firebase';
+import { az } from "date-fns/locale";
 
 const newEvents = [];
 const dateObj=new Date();
+let sw=0;
 
 const Reservation = () => {
 
   const [eventDb, setEventDb] = useState([]);
+  const [smalleventDb, setsmallEventDb] = useState([]);
 
   const [day, setDay] = useState({dateObj});
 
@@ -21,25 +24,20 @@ const Reservation = () => {
   const [error, setError]=useState();
   const [loading, setLoading]=useState();
 
-  useEffect(() => {
-    //let ref = Firebase.database().ref('/events');
-    //let ref;
-  //ref.on('value' , snapshot => {
-      //snapshot.forEach((childSnap) => {
-      //let state = childSnap.val();
-      //console.log(state);
-          //newEvents.push({title: state.title, id: state.id, resourceId: state.resourceId,start: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourStart,state.minuteStart,state.secondStart),end: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourEnd,state.minuteEnd,state.secondEnd)}); 
-          newEvents.push({title: "테스트입니다", id: 3, resourceId: 3,start: new Date('2022-02-15T14:30:00'),end: new Date('2022-02-15T18:30:00')}); 
-          //setEventDb(eventDb => [...eventDb,{title: state.title, id: state.id, resourceId: state.resourceId,start: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourStart,state.minuteStart,state.secondStart),end: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourEnd,state.minuteEnd,state.secondEnd)}]);          
-          setEventDb(eventDb => [...eventDb,{title: "asdf", id: 3, resourceId: 3,start: new Date('2022-02-15T14:30:00'),end: new Date('2022-02-15T18:30:00')}]);
-  //});
-  },[]);
+  const [rooms, setRooms] = useState([]);
+  const [resourcemap, setResourceMap] = useState([]);
 
-console.log(newEvents);
+  const [reservations, setReservations] = useState([]);
   
+  const location = useLocation();
+  const history = useHistory();
+
+  let room=[];
+  let remap=null;
+
   let today = new Date();
 
-  let formats ={
+  let format ={
     timeGutterFormat: (date, culture, localizer) => 
           localizer.format(date, 'H:mm', culture),
   }
@@ -74,37 +72,75 @@ console.log(newEvents);
   
   moment.locale('ko-KR');
   const localizer = momentLocalizer(moment)
-  const myEventsList = [
-    { start: new Date(), end: new Date(), title: "special event" }
-  ];
-  const resourceMap = [
-    { resourceId: 1, resourceTitle: 'SG 1' },
-    { resourceId: 2, resourceTitle: 'SG 2' },
-    { resourceId: 3, resourceTitle: 'SG 3' },
-    { resourceId: 4, resourceTitle: 'SG 4' },
-    { resourceId: 5, resourceTitle: 'SG 5' },
-    { resourceId: 6, resourceTitle: 'SG 6' },
-    { resourceId: 7, resourceTitle: 'SG 7' },
-  ]
+
+  const refreshPage = () => {
+    window.location.reload();
+  }
+
+  const ResourceMap = () => {
+    let roomroom=[];
+    try{
+      //console.log("리소스맵 세팅 단계 진입");
+      for(var i=0 ; i<room.length ; i++){
+        for(var j=0 ; j< room[i].roomIdx.length ; j++){
+          //console.log(room[i].roomIdx[j]+ " "+room[i].roomName+room[i].roomIdx[j]);
+          roomroom.push({resourceId: parseInt(room[i].roomIdx[j]), resourceTitle: room[i].roomName + room[i].roomIdx[j]});
+        }
+      }
+      setResourceMap(roomroom);
+      //console.log(resourcemap);
+      //console.log("리소스맵 세팅 단계 종료");
+    } catch (e){
+      console.log(e);
+    }
+  }
+  const fetchData = async () =>{
+    try {
+        setError(null);
+        setLoading(true);
+        setRooms(null);
+        setReservations(null);
+
+         //const refund = await axios.get("/pay/refund-list");
+        //setRefunds(refund.data.result);
+
+        const roomidx = await axios.get("/stores/roomIdx?storeIdx=1");
+        //console.log(roomidx.data.result);
+        room=roomidx.data.result;
+        setRooms(roomidx.data.result);
+        //console.log(rooms);
+        
+        //console.log("fetchData");
+        ResourceMap();
+
+        const reserve = await axios.get("/reservation-management/reservations/day?reservationDay=2022-01-10");
+        console.log(reserve.data.result);
+        setReservations(reserve.data.result);
+
+        console.log(reservations);
+        
+        //newEvents.push({title: "테스트입니다", roomIdx: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
+        setEventDb([]);
+        newEvents.push({id: 1, title: "asdf", start: new Date('2022-04-03T14:30:00'), end: new Date('2022-04-03T18:30:00'), resourceId: 1});
+        newEvents.push({id: 2, title: "asdf", start: new Date('2022-04-03T20:30:00'), end: new Date('2022-04-03T22:30:00'), resourceId: 2});
+        //newEvents.push({title: "테스트입니다", id: 3, roomNAme: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
+        //setEventDb(eventDb => [...eventDb,{title: state.title, id: state.id, resourceId: state.resourceId,start: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourStart,state.minuteStart,state.secondStart),end: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourEnd,state.minuteEnd,state.secondEnd)}]);          
+        setsmallEventDb({title: reserve.data.result.length+"건", id:1, start: new Date('2022-04-04T14:30:00'),end: new Date('2022-04-04T18:30:00'), resourceId: 1});
+        setEventDb(eventDb => [...eventDb,{title: "asdf", id: 1, start: new Date('2022-04-04T14:30:00'),end: new Date('2022-04-04T18:30:00'), resourceId: 35}]);
+        console.log("fetchData끝");
+
+    } catch (e){
+        console.log(e);
+        setError(e);
+    }
+    setLoading(false);
+  };
 
   useEffect(()=>{
-    const fetchData = async () =>{
-        try {
-            setError(null);
-            setLoading(true);
-
-             const refund = await axios.get("/pay/refund-list");
-            setRefunds(refund.data.result);
-        } catch (e){
-            console.log(e);
-            setError(e);
-        }
-        setLoading(false);
-    };
     fetchData();
-},[]);
+  },[]);
 
-const onRefund=e=>{
+  const onRefund=e=>{
   const re= 
   {
     "reservationIdx":Number(e.target.name),
@@ -117,6 +153,45 @@ console.log(re);
 //  window.location.reload();
 }
 
+function makeBigCalendar(){
+  //console.log("makeBigCalendar");
+  //console.log(resourcemap);
+  return(
+    <Calendar
+      //큰캘린더
+      //popup={false}
+      events={eventDb}
+      localizer={localizer}
+      defaultView={'day'}
+      views ={['day']}
+      timeslots={4}
+      step={15}
+      defaultDate={new Date()}
+      formats={format}
+      //onSelectEvent = {event => onSelectEvent(event)}
+      min={new Date(today.getFullYear(),today.getMonth(), today.getDate(), 0)}
+      //max={new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23)}
+      resources={resourcemap}
+      resourceIdAccessor="resourceId"
+      resourceTitleAccessor="resourceTitle"
+      culture={moment.locale('ko-KR')}
+      //onSelectSlot={handleSelect}
+      date={day}
+      messages={{
+        today: "오늘",
+        previous: "<",
+        next: ">",
+      }}
+      onNavigate={(date)=>{
+        //console.log('#### date=',date)
+        onSelectDate(date)
+      }}
+      components={{
+        timeSlotWrapper: ColoredDateCellWrapper,
+      }}
+    />
+  )
+}
 
   return (
     <>
@@ -129,37 +204,7 @@ console.log(re);
             <Row>
 
               <Col xl="8">
-
-                <Calendar
-                  //popup={false}
-                  events={eventDb}
-                  localizer={localizer}
-                  defaultView={'day'}
-                  views ={['day']}
-                  timeslots={4}
-                  step={15}
-                  defaultDate={new Date()}
-                  formats={formats}
-                  //onSelectEvent = {event => onSelectEvent(event)}
-                  min={new Date(today.getFullYear(),today.getMonth(), today.getDate(), 0)}
-                  //max={new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23)}
-                  resources={resourceMap}
-                  resourceIdAccessor="resourceId"
-                  resourceTitleAccessor="resourceTitle"
-                  culture={moment.locale('ko-KR')}
-                  //onSelectSlot={handleSelect}
-                  date={day}
-                  messages={{
-                    today: "오늘",
-                    previous: "<",
-                    next: ">",
-                  }}
-                  onNavigate={console.log("nextprev)")}
-                  components={{
-                    timeSlotWrapper: ColoredDateCellWrapper,
-                  }}
-              />
-
+                {makeBigCalendar()}
               </Col>
 
               <Col>
@@ -207,20 +252,18 @@ console.log(re);
                   <Col>
 
                     <Calendar
-                      //events={eventDb}
+                      //작은캘린더
+                      events={smalleventDb}
                       localizer={localizer}
                       defaultView={'month'}
                       views ={['month']}
                       timeslots={4}
                       step={15}
                       defaultDate={new Date()}
-                      formats={formats}
+                      formats={format}
                       //onSelectEvent = {event => onSelectEvent(event)}
                       min={new Date(today.getFullYear(),today.getMonth(), today.getDate(), 0)}
                       max={new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23)}
-                      resources={resourceMap}
-                      resourceIdAccessor="resourceId"
-                      resourceTitleAccessor="resourceTitle"
                       culture={moment.locale('ko-KR')}
                       messages={{
                         today: "오늘",
@@ -233,8 +276,7 @@ console.log(re);
                         //console.log('#### date=',date)
                         onSelectDate(date)
                       }}
-                    />
-              
+                    />              
                   </Col>
                 
                   <Col lg="10" xl="12">
@@ -257,35 +299,20 @@ console.log(re);
                         </div>
                       
                       </CardBody>
-                      
                       <CardBody>
-                      
                         <Row>
-                      
                           <div>
-                      
                             <p>예약 상세 내용란</p>
-                      
                           </div>
-                      
                         </Row>
-                      
                       </CardBody>
-                  
                     </Card>
-
                   </Col>
-                
                 </Row>
-              
               </Col>
-
             </Row>
-            
             <CardBody>
-
             </CardBody>
-            
             <CardBody
               style={{height: 300}}>
               asdf
