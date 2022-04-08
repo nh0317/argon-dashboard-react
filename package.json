@@ -23,7 +23,7 @@
     "url": "https://github.com/creativetimofficial/argon-dashboard-react/issues"
   },
   "homepage": "https://demos.creative-tim.com/argon-dashboard-react/",
-  "proxy": "http://seoul.naturemobility.com:18080/",
+  "proxy": "https://seoul.naturemobility.com:18080/",
   "scripts": {
     "start": "export PORT=8083 && react-scripts start",
     "build": "react-scripts build",
