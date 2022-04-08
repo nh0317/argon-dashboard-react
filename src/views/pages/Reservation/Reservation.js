@@ -29,6 +29,8 @@ const Reservation = () => {
 
   const [reservations, setReservations] = useState([]);
   
+  const [selectedDate, setSelectedDate] = useState();
+
   const location = useLocation();
   const history = useHistory();
 
@@ -84,7 +86,8 @@ const Reservation = () => {
       for(var i=0 ; i<room.length ; i++){
         for(var j=0 ; j< room[i].roomIdx.length ; j++){
           //console.log(room[i].roomIdx[j]+ " "+room[i].roomName+room[i].roomIdx[j]);
-          roomroom.push({resourceId: parseInt(room[i].roomIdx[j]), resourceTitle: room[i].roomName + room[i].roomIdx[j]});
+          console.log(room[i].roomType+" "+room[i].roomIdx[j]);
+          roomroom.push({resourceId: parseInt(room[i].roomIdx[j]), resourceTitle: room[i].roomType + room[i].roomIdx[j]});
         }
       }
       setResourceMap(roomroom);
@@ -105,7 +108,7 @@ const Reservation = () => {
         //setRefunds(refund.data.result);
 
         const roomidx = await axios.get("/stores/roomIdx?storeIdx=1");
-        //console.log(roomidx.data.result);
+        console.log(roomidx.data.result);
         room=roomidx.data.result;
         setRooms(roomidx.data.result);
         //console.log(rooms);
@@ -119,6 +122,7 @@ const Reservation = () => {
 
         console.log(reservations);
         
+
         //newEvents.push({title: "테스트입니다", roomIdx: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
         setEventDb([]);
         newEvents.push({id: 1, title: "asdf", start: new Date('2022-04-03T14:30:00'), end: new Date('2022-04-03T18:30:00'), resourceId: 1});
@@ -192,6 +196,13 @@ function makeBigCalendar(){
     />
   )
 }
+const onSelectEvent = (event) => {
+  //alert(`${selectedDate}, ${event.title}`);
+  listenSlotClick();
+};
+
+const listenSlotClick = (event) => {
+};
 
   return (
     <>
@@ -270,11 +281,14 @@ function makeBigCalendar(){
                         previous: "<",
                         next: ">",
                       }}
-                      style={{ height: 300 }}
+                      style={{ height: 320 }}
                       //selectable={true}
                       onNavigate={(date)=>{
                         //console.log('#### date=',date)
                         onSelectDate(date)
+                      }}
+                      onSelectEvent={(smalleventDb)=>{
+                        onSelectDate(smalleventDb.start)
                       }}
                     />              
                   </Col>
