@@ -1,11 +1,14 @@
-import React, {useState} from "react";
-import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, CardGroup } from "reactstrap";
-import Header from "components/Headers/Header.js";
+import React, {useState, useEffect} from "react";
+import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, Table, Input ,Button} from "reactstrap";
+import Header from "./Header.js";
 import style from "views/pages/DashBoard/style";
 import {Calendar, momentLocalizer} from 'react-big-calendar'
 //import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
 import moment from 'moment'
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import axios from "axios";
+import useInput from "hooks/useInput";
+
 
 const Dashboard = () => {
 
@@ -40,197 +43,251 @@ const Dashboard = () => {
     { start: new Date(), end: new Date(), title: "special event" }
   ];
 
+  const [reload, setReload]=useState(1);
+  const [dayData, setDayData ] = useState([]);
+  const [monthData, setMonthData ] = useState([]);
+  const [review, setReview]=useState();
+  const [reserve, setReserve] =useState([]);
+  const [memos, setMemos] =useState([]);
+  const [newMemo, onChangeNewMemo, setNewMemo]=useInput();
+  const [dateData, setDateData]=useState([]);
+  const [dateDetail, setDateDetail] =useState(null);
+
+  const [loading, setLoading] =useState();
+  const [error, setError]=useState();
+
+  useEffect(()=>{
+      const fetchData = async () =>{
+          try {
+              setError(null);
+              setLoading(true);
+
+              const d = await axios.get("/dashboard/today-sales");
+              setDayData(d.data.result);
+              console.log(d.data.result);
+              // "reservationCount": 3,    "todaySales": 135000
+              const d2 = await axios.get("/dashboard/month-sales");
+              setMonthData(d2.data.result);
+              //    "reservationCount": 4, "monthSales": 189000
+              const d3 = await axios.get("/dashboard/reservations");
+              setReserve(d3.data.result);
+              // "reservationTime": "15:30",  "selectedHall": 3, "personCount": 1, "numberOfGame": 2, "userTime": 60
+            
+              const d5 = await axios.get("/dashboard/calendar");
+              console.log(d5);
+              d5.data.result.map(d=>{
+                setDateData(prev=>[...prev,{
+                  
+                    'title': d.count + "건",
+                    'allDay': true,
+                    'start': new Date(d.date),
+                    'end': new Date(d.date)
+                }]);
+              });
+
+              //dummy data 확인용
+              setDateData(prev=>[...prev,{
+                'title': 2+ " 건",
+                'allDay': true,
+                'start': new Date("2022-04-04"),
+                'end': new Date("2022-04-04")
+            }]);
+            //
+                      
+               } catch (e){
+              console.log(e);
+              setError(e);
+          }
+          setLoading(false);
+      };
+      fetchData();
+  },[ ]);
+
+  useEffect(()=>{
+    const fetchMemo = async () =>{
+        try {
+            setError(null);
+            setLoading(true);
+            const d4 = await axios.get("/dashboard/memo");
+            setMemos(d4.data.result);
+        } catch (e){
+            console.log(e);
+            setError(e);
+        }
+        setLoading(false);
+    };
+    fetchMemo();
+},[ ,reload]);
+
+const onCreateMemo=e=>{
+ const newData= {
+  "content" : newMemo
+}
+try{
+  axios.post('/dashboard/memo', newData).then(response => {
+  console.log(response);
+  setNewMemo("");
+  setReload(reload+1);
+  });
+}catch(e){
+  console.log(e);
+}}
+const onDelMemo=e=>{
+  try{
+    axios.delete(`/dashboard/memo/${e.target.value}`).then(response => {
+    console.log(response);
+    setReload(reload+1);
+    });
+  }catch(e){
+    console.log(e);
+  }
+}
+ const onSelectEvent=e=>{
+   const date = e.start.toISOString().substr(0,10);
+   try{
+    axios.get(` /dashboard/reservations/day?reservationDay=${date}`).then(response => {
+    setDateDetail(response.data.result);
+    });
+  }catch(e){
+    console.log(e);
+  }
+  
+
+
+ }
+
+
   return (
     <>
-      <Header />
+      <Header dayData={dayData} monthData ={monthData} datetimer={datetimer} clocktimer={clocktimer}/>
       {/* Page content */}
-      <h2>{datetimer}</h2>
-      <h1>{clocktimer}</h1>
-      <div className="pb-8 pt-5 pt-md-2">
-        <Container fluid>
-          <div className="header-body">
-            <Row>
-              <Col>
-                <Card className="card-stats mb-4 mb-xl-0 col-md-30 col-sm-60 h-100">
-                  <CardBody className="bg-primary">
-                  <div className="col">
-                      <CardTitle
-                      tag="h1"
-                      className="text-uppercase mb-0"  
-                    >
-                      오늘 예약 및 매장 현황
-                    </CardTitle>
-                      </div>
-                  </CardBody>
-                  <Row>
-                  <CardBody>
-                    오늘의예약
-                  </CardBody>
-                  <CardBody>
-                    오늘 매출
-                  </CardBody>
-                  <CardBody>
-                    평균 평점
-                  </CardBody>
-                  </Row>
-                  <Row>
-                  <CardBody
-                  style={{ height: 200 }}>
-                    <div>
-                      홀 리스트
-                    </div>
-                  </CardBody>
-                  </Row>
-                  <Row>
-                  <CardBody>
-                    <div>
-                      예약 관리 바로 가기
-                    </div>
-                  </CardBody>
-                  </Row>
-                  <CardBody>
-                    <Row>
-                    <div className="col">
-                      </div>
-                      <Col className="col-auto">
-                      </Col>
-                    </Row>
-                  </CardBody>
+      <Container className="mt--7" fluid>
+        <Row>
+          <Col className="mb-5 mb-xl-0" xl="8" lg="8">
+         
+            <Card className="shadow" style={{height:"100%"}}>
+              <CardHeader className="bg-transparent">
+                <h3 className="mb-0">오늘 예약 및 매장 현황</h3>
+              </CardHeader>
+              <CardBody>
+              <Table>
+                <thead className="thead-light">
+                <tr>
+                <th scope="col"> 시간</th>
+                <th scope="col">홀</th>
+                <th scope="col">인원 수 </th>
+                <th scope="col">게임 수</th>
+                <th scope="col">이용 시간</th>
+                </tr>'</thead>
+                <tbody>
+                  {reserve.map(d=>
+                      <tr key={d.reservationTime}>
+                      <td>{d.reservationTime}</td>
+                      <td>{d.selectedHall}</td>
+                      <td>{d.personCount}</td>
+                      <td>{d.numberOfGame}</td>
+                      <td>{d.userTime}</td>
+                      </tr>
+                    )}
+                </tbody>
+              </Table>
+
+                </CardBody>
                 </Card>
-              </Col>
-              <Col xl="4">
-                <Card className="card-stats mb-4 mb-xl-0 col-md-30 col-sm-60">
-                  <CardBody className="bg-primary">
-                  <div className="col">
-                      <CardTitle
-                      tag="h1"
-                      className="text-uppercase mb-0"
-                    >
-                      관리 메모
-                    </CardTitle>
-                      </div>
-                  </CardBody>
+          </Col>
+              <Col lg="8" xl="4">
+                <Card  className="shadow ">
+                <CardHeader className="bg-info">
+                <h3 className="mb-0">관리자 메모</h3>
+              </CardHeader>
                   <CardBody>
-                    <Row>
-                      <div>
-                        <p>골프채 교체</p>
-                      </div>
-                    </Row>
+                <Table>
+                {memos.map(d=>
+                <tr key={d.memoIdx}>
+                <td>
+              <span className="h5">
+             {d.memo}
+              </span>  
+              </td>
+              <td>
+              <button className="btn btn-outline-secondary btn-sm"
+              value={d.memoIdx}
+              onClick={e=>onDelMemo(e)}
+              >
+                 [ - ]
+              </button>  
+              </td>
+            </tr>)}
+                    
+                    <tr>    <th>
+<Input style={{display:"inline-block" ,width:"85%"}}
+                        className="form-control-alternative mr-2"
+                        rows="3"
+                        value={newMemo}
+                        onChange={onChangeNewMemo}
+                        placeholder="메모 추가"
+                        type="textarea"
+                      /> 
+                  <Button
+                  Input style={{verticalAlign:"top"}}
+                   onClick={e=>onCreateMemo(e)} 
+                color="info">
+               추가
+              </Button>
+                    </th> 
+                    </tr>
+                </Table>
                   </CardBody>
                 </Card>
               </Col>
               </Row>
               <br/>
-              <Row classname="row mt-4">
-              <Col lg="6" xl="4">
-                <Card>
-                  <CardBody>
-                    <Row>
-                      <div className="col">
-                        <CardTitle
-                          tag="h3"
-                          className="text-uppercase text-muted mb-0"
-                        >
-                          매장 현황
-                        </CardTitle>
-                        <div>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">97</p>
-                          <p className="h3 text-center">즐겨찾기</p>
-                          <br/>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">100,000</p>
-                          <p className="h3 text-center">이번달 예약</p>
-                        </div>
-                      </div>
-                    </Row>
-                  </CardBody>
-                </Card>
-              </Col>
-              <Col lg="6" xl="4">
-                <Card>
-                  <CardBody>
-                    <Row>
-                      <div className="col">
-                        <CardTitle
-                          tag="h3"
-                          className="text-uppercase text-muted mb-0"
-                        >
-                          매장 후기
-                        </CardTitle>
-                        <div>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">924</p>
-                          <p className="h3 text-center">전체 후기</p>
-                          <br/>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">10</p>
-                          <p className="h3 text-center">미 답변 후기</p>
-                        </div>
-                      </div>
-                    </Row>
-                  </CardBody>
-                </Card>
-              </Col>
-              <Col lg="6" xl="4">
-                <Card>
-                  <CardBody>
-                    <Row>
-                      <div className="col">
-                        <CardTitle
-                          tag="h3"
-                          className="text-uppercase text-muted mb-0"
-                        >
-                          정산 관리
-                        </CardTitle>
-                        <div>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">D-20</p>
-                          <p className="h3 text-center">　</p>
-                          <br/>
-                          <br/>
-                          <p className="h2 text-center font-weight-bold mb-0">5,500,000</p>
-                          <p className="h3 text-center">이번달 매출</p>
-                        </div>
-                      </div>
-                    </Row>
-                  </CardBody>
-                </Card>
-              </Col>
-            </Row>
-            <br/>
-          </div>
+            
           <Card className="card-stats mb-4 mb-xl-0 col-md-30 col-sm-60 h-100">
-                  <CardBody className="bg-primary">
-                  <div className="col">
-                      <CardTitle
-                      tag="h1"
-                      className="text-uppercase mb-0"  
-                    >
-                      이번 달 예약 현황
-                    </CardTitle>
-                      </div>
-                  </CardBody>
-                    <div>
-
-                    </div>
+              <CardHeader className="bg-info">
+                <h3 className="mb-0 text-white">이번 달 예약 현황</h3>
+              </CardHeader>
                   <CardBody>
                     <Calendar
-                      events={myEventsList}
+                      events={dateData}
                       startAccessor="start"
                       endAccessor="end"
                       defaultDate={moment().toDate()}
                       localizer={localizer}
                       style={{ height: 600 }}
+                      onSelectEvent = {event => onSelectEvent(event)}
                     /> 
                   </CardBody>
+                  { dateDetail?
                   <CardBody
                     style={{height: 300}}>
-                    예약 현황 공간
-                  </CardBody>
+             <CardHeader className="bg-transparent">
+                <h4 className="mb-0">선택 날짜 예약 현황</h4>
+              </CardHeader>                  <Table>
+                <thead className="thead-light">
+                <tr>
+                <th scope="col"> 시간</th>
+                <th scope="col">홀</th>
+                <th scope="col">인원 수 </th>
+                <th scope="col">게임 수</th>
+                <th scope="col">이용 시간</th>
+                </tr>'</thead>
+                <tbody>
+                  {dateDetail.map(d=>
+                      <tr key={d.reservationTime}>
+                      <td>{d.reservationTime}</td>
+                      <td>{d.selectedHall}</td>
+                      <td>{d.personCount}</td>
+                      <td>{d.numberOfGame}</td>
+                      <td>{d.userTime}</td>
+                      </tr>
+                    )}
+                </tbody>
+              </Table>
+
+                  </CardBody>:null}
                 </Card>
         </Container>
-      </div>
     </>
   );
 };
