@@ -97,7 +97,7 @@ const Reservation = () => {
       console.log(e);
     }
   }
-  const fetchData = async () =>{
+  const fetchData = useCallback(async () =>{
     try {
         setError(null);
         setLoading(true);
@@ -111,7 +111,7 @@ const Reservation = () => {
         console.log(roomidx.data.result);
         room=roomidx.data.result;
         setRooms(roomidx.data.result);
-        //console.log(rooms);
+        console.log(rooms);
         
         //console.log("fetchData");
         ResourceMap();
@@ -129,7 +129,7 @@ const Reservation = () => {
         newEvents.push({id: 2, title: "asdf", start: new Date('2022-04-03T20:30:00'), end: new Date('2022-04-03T22:30:00'), resourceId: 2});
         //newEvents.push({title: "테스트입니다", id: 3, roomNAme: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
         //setEventDb(eventDb => [...eventDb,{title: state.title, id: state.id, resourceId: state.resourceId,start: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourStart,state.minuteStart,state.secondStart),end: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourEnd,state.minuteEnd,state.secondEnd)}]);          
-        setsmallEventDb({title: reserve.data.result.length+"건", id:1, start: new Date('2022-04-04T14:30:00'),end: new Date('2022-04-04T18:30:00'), resourceId: 1});
+        setsmallEventDb({title: reserve.data.result.length+"건", id:1, start: new Date('2022-04-10T14:30:00'),end: new Date('2022-04-10T18:30:00'), resourceId: 1});
         setEventDb(eventDb => [...eventDb,{title: "asdf", id: 1, start: new Date('2022-04-04T14:30:00'),end: new Date('2022-04-04T18:30:00'), resourceId: 35}]);
         console.log("fetchData끝");
 
@@ -138,7 +138,7 @@ const Reservation = () => {
         setError(e);
     }
     setLoading(false);
-  };
+  });
 
   useEffect(()=>{
     fetchData();
