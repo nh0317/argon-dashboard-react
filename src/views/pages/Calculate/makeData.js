@@ -1,4 +1,6 @@
 import namor from 'namor'
+import React, { useEffect,useState } from 'react';
+import axios from "axios";
 
 const range = len => {
   const arr = []
@@ -8,42 +10,43 @@ const range = len => {
   return arr
 }
 
-const newPerson = () => {
+const newPerson = async () => {
   const statusChance = Math.random()
-  return {
-    cel1: namor.generate({ words: 1, numbers: 1 }),
-    cel2: namor.generate({ words: 0, numbers: 1 }),
-    cel3: namor.generate({ words: 0, numbers: 1 }),
-    cel4: namor.generate({ words: 2, numbers: 1 }),
-    cel5: namor.generate({ words: 0, numbers: 1 }),
-    cel6: namor.generate({ words: 0, numbers: 1 }),
-    cel7: namor.generate({ words: 0, numbers: 1 }),
-    cel8: namor.generate({ words: 0, numbers: 1 }),
-    cel9: namor.generate({ words: 0, numbers: 1 }),
-    //firstName: namor.generate({ words: 1, numbers: 0 }),
-    //lastName: namor.generate({ words: 1, numbers: 0 }),
-    //age: Math.floor(Math.random() * 30),
-    //visits: Math.floor(Math.random() * 100),
-    //progress: Math.floor(Math.random() * 100),
+  const arr = await axios.get("/calculate-management/calculation").then(res=>res.data.result)
+
+  const data = arr.map(v => ({
+    cel1: v.sales,
+    cel2: v.fees,
+    cel3: v.price,
+    cel4: v.calculateStatus,
+    cel5: v.sales,
+    cel6: v.price,
+    cel7: v.calculateStatus,
+    cel8: v.createdAt,
+    cel9: v.calculatedAt,
     status:
-      statusChance > 0.66
-        ? 'relationship'
-        : statusChance > 0.33
-        ? 'complicated'
-        : 'single',
-  }
+        statusChance > 0.66
+            ? 'relationship'
+            : statusChance > 0.33
+            ? 'complicated'
+            : 'single',
+  }))
+
+  return data
 }
 
-export default function makeData(...lens) {
-  const makeDataLevel = (depth = 0) => {
-    const len = lens[depth]
-    return range(len).map(d => {
+export default async function makeData(...lens) {
+  const makeDataLevel = async (depth = 0) => {
+    //const len = lens[depth]
+    const data = await newPerson()
+    console.log(data)
+    return data.map(d => {
       return {
-        ...newPerson(),
+        ...d,
         subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
       }
     })
   }
 
-  return makeDataLevel()
+  return await makeDataLevel()
 }
