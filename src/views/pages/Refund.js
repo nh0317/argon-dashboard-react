@@ -6,6 +6,7 @@ import axios from "axios"
 const Refund = () => {
 
     const [refunds, setRefunds]=useState([]);
+    const [refundsDone, setRefundsDone]=useState([]);
     const [error, setError]=useState();
     const [loading, setLoading]=useState();
     useEffect(()=>{
@@ -14,9 +15,14 @@ const Refund = () => {
                 setError(null);
                 setLoading(true);
     
-                 const refund = await axios.get("/pay/refund-list");
-                setRefunds(refund.data.result);
-            } catch (e){
+                 const d1 = await axios.get("/pay/refund-paging-list?status=Requesting");
+                 setRefunds(d1.data.result.refunds);
+                     
+                 const d2 = await axios.get("/pay/refund-paging-list?status=Approved");
+                 setRefundsDone(d2.data.result.refunds);
+
+
+              } catch (e){
                 console.log(e);
                 setError(e);
             }
@@ -66,7 +72,7 @@ const Refund = () => {
                   </tr>
                 </thead>
                 <tbody>
-                    {refunds.filter(r=>r.refundStatus!=="환불 완료").map(r=>
+                    {refunds.map(r=>
                     <tr>
                       <th  width="40">{r.reservationIdx} </th>
                       <th width="200"> {r.merchantUid} </th>
@@ -117,7 +123,7 @@ const Refund = () => {
                   </tr>
                 </thead>
                 <tbody>
-                    {refunds.filter(r=>r.refundStatus==="환불 완료").map(r=>
+                    {refundsDone.map(r=>
                   
                     <tr>
                       <th  width="40">{r.reservationIdx} </th>

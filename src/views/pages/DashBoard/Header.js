@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import axios from "axios";
-import { Card, CardHeader, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
+import { NavLink as NavLinkRRD, Link } from "react-router-dom";
+import { Card,NavLink, Button, CardHeader, CardBody, CardTitle, Container, Row, Col } from "reactstrap";
 
 const Header = ( props ) => {
     const sales = ""+props.dayData.todaySales;
@@ -11,6 +12,31 @@ const Header = ( props ) => {
       <div className="header bg-gradient-info pb-7 pt-5 pt-md-8">
         <Container fluid>
           <div className="header-body">
+            {props.ifNew==true?
+            <Card className="card-stats mb-4 mb-xl-3">
+              <CardBody>
+                <Row>
+                  <div className="col">
+                    <div className="h3 font-weight-bold m-3">
+                    아직 매장을 등록하지 않으셨나요?
+
+                            </div>
+                            <NavLink to= {{pathname:"/admin/storeedit"}}
+                              tag={NavLinkRRD}
+                              activeClassName="active"
+                            >    
+                            <Button
+                            className="mb-1"
+                            color="info">
+                            매장 등록하러 가기 
+                          </Button>
+              </NavLink>   
+                  </div>
+                  </Row>
+              </CardBody>
+            </Card>
+         :null }  
+        
             <Row>   
               <Col lg="6" xl="4">
                 <Card style={{height:"90%"}} className="card-stats mb-4 mb-xl-3">
@@ -93,7 +119,8 @@ const Header = ( props ) => {
                         >
                           매장 평점
                         </CardTitle>
-                        <span className="h2 font-weight-bold m-2"> 4.5 </span>
+                        {props.review ?
+                        <span className="h2 font-weight-bold m-2"> {props.review.starPoint} </span>:null}
                         <span className="h2 font-weight-normal text-muted m-2"> / 5.0 점 </span>
                       </div>
                       <Col className="col-auto mt-2 mb-2">

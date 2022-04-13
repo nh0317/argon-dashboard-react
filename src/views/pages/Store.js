@@ -45,6 +45,7 @@ const Store = () => {
             
             const d1 = await axios.get("/partner/myStore");
             setData(d1.data.result);
+            console.log(d1);
             setImages(d1.data.result.storeImage);
             const i = await axios.get("/partner/get_storeIdx");
             const idx= i.data.result.storeIdx;
@@ -205,21 +206,28 @@ const Store = () => {
 </th>
 <td>
                 <Card className="mt-2">
-              <Table>
+              <Table >
                 <thead>
-                  <th width="100">방 종류</th><th>방 현황</th>
+                  <th style={{"width":"5%"}}>방 종류</th><th style={{"width":"5%"}}>개수</th><th>방 현황 (idx)</th>
                 </thead>
                 <tbody>
                   {roomData.map(d=>
                      <tr>
                      <th>
-                    {d.roomName}
+                    {d.roomType}
                      </th>
                      <td>
-                       {d.roomIdx.map(i=>
-                       <span className="mr-3">
-                         {d.roomName}{i}
-                       </span>
+                       {d.roomIdx.length}
+                     </td>
+                     <td>
+                       {d.roomIdx.map( (i,index )=>
+                       <span>
+                       <div style={{"display":"inline-block"}}className="mr-3">
+                         {i}번방
+                       </div>
+                        {(index+1)%10==0?
+                        <br/>:null}
+                      </span>
                        )}
                      </td>
                    </tr>

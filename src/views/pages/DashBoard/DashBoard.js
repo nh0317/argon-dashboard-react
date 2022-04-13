@@ -1,6 +1,7 @@
 import React, {useState, useEffect} from "react";
 import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, Table, Input ,Button} from "reactstrap";
 import Header from "./Header.js";
+import { useHistory } from 'react-router-dom';
 import style from "views/pages/DashBoard/style";
 import {Calendar, momentLocalizer} from 'react-big-calendar'
 //import { Calendar as BigCalendar, momentLocalizer } from "react-big-calendar";
@@ -46,35 +47,49 @@ const Dashboard = () => {
   const [reload, setReload]=useState(1);
   const [dayData, setDayData ] = useState([]);
   const [monthData, setMonthData ] = useState([]);
-  const [review, setReview]=useState();
+  const [review, setReview]=useState([]);
   const [reserve, setReserve] =useState([]);
   const [memos, setMemos] =useState([]);
   const [newMemo, onChangeNewMemo, setNewMemo]=useInput();
   const [dateData, setDateData]=useState([]);
   const [dateDetail, setDateDetail] =useState(null);
-
+  const [ifNew, setIfNew]=useState();
   const [loading, setLoading] =useState();
   const [error, setError]=useState();
+  const history= useHistory();
 
   useEffect(()=>{
+
       const fetchData = async () =>{
           try {
               setError(null);
               setLoading(true);
 
+              const i = await axios.get("/partner/get_storeIdx");
+              if(i.data.code==3015) setIfNew(true);
+              else if(i.data.code==3010 ){ //모바일 계정인 경우
+                axios.post('/users/logout').then(response => {
+                  console.log(response);
+                  alert("로그아웃 되었습니다.");
+                  history.replace("/auth/signin");
+                  window.location.reload();
+                  });
+                }
+
               const d = await axios.get("/dashboard/today-sales");
               setDayData(d.data.result);
-              console.log(d.data.result);
               // "reservationCount": 3,    "todaySales": 135000
               const d2 = await axios.get("/dashboard/month-sales");
-              setMonthData(d2.data.result);
+              setMonthData(d2.data.result);   
               //    "reservationCount": 4, "monthSales": 189000
               const d3 = await axios.get("/dashboard/reservations");
               setReserve(d3.data.result);
               // "reservationTime": "15:30",  "selectedHall": 3, "personCount": 1, "numberOfGame": 2, "userTime": 60
-            
+             
+              const d6= await axios.get("/partner/star_point");
+              setReview(d6.data.result);
+                        
               const d5 = await axios.get("/dashboard/calendar");
-              console.log(d5);
               d5.data.result.map(d=>{
                 setDateData(prev=>[...prev,{
                   
@@ -84,16 +99,7 @@ const Dashboard = () => {
                     'end': new Date(d.date)
                 }]);
               });
-
-              //dummy data 확인용
-              setDateData(prev=>[...prev,{
-                'title': 2+ " 건",
-                'allDay': true,
-                'start': new Date("2022-04-04"),
-                'end': new Date("2022-04-04")
-            }]);
-            //
-                      
+        
                } catch (e){
               console.log(e);
               setError(e);
@@ -158,8 +164,8 @@ const onDelMemo=e=>{
 
 
   return (
-    <>
-      <Header dayData={dayData} monthData ={monthData} datetimer={datetimer} clocktimer={clocktimer}/>
+    <>      <Header dayData={dayData} monthData ={monthData} datetimer={datetimer} clocktimer={clocktimer} review={review} ifNew={ifNew}/>
+
       {/* Page content */}
       <Container className="mt--7" fluid>
         <Row>
@@ -178,9 +184,9 @@ const onDelMemo=e=>{
                 <th scope="col">인원 수 </th>
                 <th scope="col">게임 수</th>
                 <th scope="col">이용 시간</th>
-                </tr>'</thead>
+                </tr></thead>
                 <tbody>
-                  {reserve.map(d=>
+                  {reserve?reserve.map(d=>
                       <tr key={d.reservationTime}>
                       <td>{d.reservationTime}</td>
                       <td>{d.selectedHall}</td>
@@ -188,7 +194,7 @@ const onDelMemo=e=>{
                       <td>{d.numberOfGame}</td>
                       <td>{d.userTime}</td>
                       </tr>
-                    )}
+                    ):null}
                 </tbody>
               </Table>
 
@@ -202,7 +208,7 @@ const onDelMemo=e=>{
               </CardHeader>
                   <CardBody>
                 <Table>
-                {memos.map(d=>
+                {memos?memos.map(d=>
                 <tr key={d.memoIdx}>
                 <td>
               <span className="h5">
@@ -217,7 +223,7 @@ const onDelMemo=e=>{
                  [ - ]
               </button>  
               </td>
-            </tr>)}
+            </tr>):null}
                     
                     <tr>    <th>
 <Input style={{display:"inline-block" ,width:"85%"}}
@@ -266,20 +272,20 @@ const onDelMemo=e=>{
               </CardHeader>                  <Table>
                 <thead className="thead-light">
                 <tr>
-                <th scope="col"> 시간</th>
+                <th scope="col">예약 시간</th>
+                <th scope="col">이용 시간</th>
                 <th scope="col">홀</th>
                 <th scope="col">인원 수 </th>
                 <th scope="col">게임 수</th>
-                <th scope="col">이용 시간</th>
-                </tr>'</thead>
+                </tr></thead>
                 <tbody>
                   {dateDetail.map(d=>
                       <tr key={d.reservationTime}>
-                      <td>{d.reservationTime}</td>
-                      <td>{d.selectedHall}</td>
-                      <td>{d.personCount}</td>
-                      <td>{d.numberOfGame}</td>
-                      <td>{d.userTime}</td>
+                      <th>{d.reservationTime}</th>
+                      <th>{d.userTime}분</th>
+                      <td>{d.selectedHall}홀</td>
+                      <td>{d.personCount}명</td>
+                      <td>{d.numberOfGame}회</td>
                       </tr>
                     )}
                 </tbody>

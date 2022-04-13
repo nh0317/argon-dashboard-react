@@ -2,12 +2,14 @@ import React, {useState, useEffect} from "react";
 import Header from "components/Headers/Header.js";
 import axios from "axios";
 import useInput from "hooks/useInput";
+import Post from "./Post";
 import { NavLink as NavLinkRRD, Link } from "react-router-dom";
 
-import * as S from "./style";
+import * as S from "../style";
 import {
   Badge,
   Card,Col,
+  CardBody,
   CardHeader,
   CardFooter,
   DropdownMenu,
@@ -26,15 +28,17 @@ import {
   Input,
   UncontrolledTooltip,
 } from "reactstrap";
+import { drawerClasses } from "@mui/material";
 
 const StoreEdit = ( ) => {
-  const [data2, setData2] = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading ]=useState(false);
   const [error, setError] = useState(null);
   
   const [reload,setReload]=useState(1);
 
   const [brands, setBrands]=useState([]);
+  const [mainImage, setMainImage]=useState();
   const [storeImage, setStoreImage]=useState([]);
     
   const [nm, onChangeNm, setNm] = useInput();
@@ -58,6 +62,7 @@ const StoreEdit = ( ) => {
   const [rs, setRs] =useState();
   const [cs, setCs] =useState();
   const [lc, onChangeLc, setLc] =useInput();
+  const [postPop, setPostPop]=useState(false);
   //for files
   const [main, setMain]=useState();
   const [images, setImages]=useState([]);
@@ -67,12 +72,15 @@ const StoreEdit = ( ) => {
         try {
             setError(null);
             setLoading(true);
+        
+            const d = await axios.get("/partner/myStore");
+            console.log(d);
+            setData(d.data.result);
             
             const response = await axios.get("/stores/brand");
             setBrands(response.data.result);
-            const d = await axios.get("/partner/myStore");
-            console.log(d);
-            setData2(d.data.result);
+
+            if(d.data.result.storeName!=null){
             setNm(d.data.result.storeName);
             setInf(d.data.result.storeInfo);
             setPn(d.data.result.storePhoneNumber);
@@ -92,20 +100,23 @@ const StoreEdit = ( ) => {
             setRs(d.data.result.reserveStatus);
             setCs(d.data.result.couponStatus);
            setLc(d.data.result.storeLocation);
-          
+           setMainImage(d.data.result.mainStoreImage);
+
            const i = await axios.get("/partner/get_storeIdx");
-           const idx= i.data.result.storeIdx;
-           
+          const idx= i.data.result.storeIdx;    
+
            const im = await axios.get(`/stores/images/${idx}`)
            setStoreImage(im.data.result);
-           
+
            const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
            setRoomData(d2.data.result);
+           setBc(0);
            d2.data.result.map(d=>{
             setBc(prev=>prev+d.roomIdx.length);
-          });
-         
+            });
+          }  
         } catch (e){
+          console.log("useEffect error:" + e);
             setError(e);
         }
         setLoading(false);
@@ -200,7 +211,7 @@ try{
 
   const onRoom=e=>{
     const newData ={
-      "roomName" : room,
+      "roomType" : room,
       "count":roomCount
     }
     axios.post("/partner/room",newData).then(response=>{
@@ -223,17 +234,17 @@ const onSubmit =event =>{
   "storePhoneNumber": pn,
   "storeBrand": br,
   "storeLocation": lc,
-  "storeImage": [],
   "storeTime": startTime+" ~ "+endTime,
+  "storeImage": [],
   "batCount": bc,
-  "lefthandStatus": lhs,
-  "parkingStatus": ps,
-  "groupSeatStatus": gs,
-  "floorScreenStatus": fss,
-  "storageStatus": ss,
-  "lessonStatus": ls,
-  "reserveStatus": rs,
-  "couponStatus": cs
+  "lefthandStatus": lhs?lhs:false,
+  "parkingStatus": ps?ps:false,
+  "groupSeatStatus": gs?gs:false,
+  "floorScreenStatus": fss?fss:false,
+  "storageStatus": ss?ss:false,
+  "lessonStatus": ls?ls:false,
+  "reserveStatus": rs?rs:false,
+  "couponStatus": cs?cs:false
 }
 
 console.log(newData);
@@ -358,7 +369,17 @@ try{
                         </Media>
                       </Media>
                     </th>
-                    <td> <Input
+                    <td> 
+                      <Button
+                      onClick={()=>{
+                        setPostPop(!postPop)
+                      }}>
+                        주소 검색
+                      </Button>
+                      {postPop &&
+                      <Post address={lc} setAddress={setLc}/>}
+                      
+                      <Input
                             className="form-control-alternative"
                             type="text"
                             onChange={onChangeLc}
@@ -443,7 +464,7 @@ onChange={e=>onETime(e)}
                             className="form-control-alternative mr-3"
                             type="text"
                             onChange={onChangeRoom}
-                            placeholder="방 이름"
+                            placeholder="방 종류"
                             value={room}
                           /> 
  
@@ -462,27 +483,32 @@ onChange={e=>onETime(e)}
                 <Card className="mt-2">
               <Table>
                 <thead>
-                  <th width="100">방 종류</th><th>방 현황</th>
+                <th style={{"width":"5%"}}>방 종류</th><th style={{"width":"5%"}}>개수</th><th>방 현황 (idx)</th>
                 </thead>
                 <tbody>
                   {roomData.map(d=>
                      <tr>
                      <th>
-                    {d.roomName}
+                    {d.roomType}
                      </th>
                      <td>
-                       <div style={{width:"200px"}}>
-                       {d.roomIdx.map(i=>
-                       <span className="mr-3">
-                         {d.roomName}{i}
-                         <button className="btn btn-outline-secondary btn-sm"
-              value={i}
-              onClick={e=>onDelRoom(e)}
-              >
-                 [ - ]              </button>  
-                       </span>
-                       )}
+                       {d.roomIdx.length}
+                     </td>
+                     <td>
+                       {d.roomIdx.map( (i,index )=>
+                       <span>
+                       <div style={{"display":"inline-block"}}className="mr-2">
+                         {i}번방
+                         <button className="btn btn-outline-secondary btn-sm m-0"
+                          value={i}
+                          onClick={e=>onDelRoom(e)}
+                          >
+                          [ - ]</button>  
                        </div>
+                        {(index+1)%8==0?
+                        <br/>:null}
+                      </span>
+                       )}
                      </td>
                    </tr>
                     )}
@@ -738,6 +764,10 @@ onChange={e=>onETime(e)}
               <CardHeader className="border-0">
                 <h3 className="mb-0">매장 사진 관리</h3>
               </CardHeader>
+              <CardBody>
+              { data.storeName==null?
+            <h5>매장 정보를 먼저 등록해주세요</h5>  
+            :
               <Table className="align-items-center table-flush" responsive>
 
                 <thead className="thead-light">
@@ -759,7 +789,7 @@ onChange={e=>onETime(e)}
             <td>
             <S.Image>
 
-               <img src={data2.mainStoreImage}/>
+               <img src={mainImage}/>
                </S.Image>
 
                <Input type="file" class="form-control"
@@ -810,6 +840,8 @@ class="form-control sm">
             </tr>
             </tbody>
             </Table>
+}            </CardBody>
+
         </Card>
         </div>
         </Row>

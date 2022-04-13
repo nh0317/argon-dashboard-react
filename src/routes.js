@@ -31,7 +31,7 @@ import Store from "views/pages/Store.js";
 import Review from "views/pages/Review.js";
 import Signin from "views/pages/Signin";
 import Signup from "views/pages/Signup";
-import StoreEdit from "views/pages/StoreEdit";
+import StoreEdit from "views/pages/StoreEdit/StoreEdit";
 import Refund from "views/pages/Refund";
 var routes = [
   {
