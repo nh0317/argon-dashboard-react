@@ -1,11 +1,14 @@
 import React, {useCallback, useState, useEffect} from "react";
 import { useHistory, useLocation, withRouter } from 'react-router-dom';
+import Chip from '@mui/material/Chip';
+import Stack from '@mui/material/Stack';
 import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, CardGroup,Table,Button } from "reactstrap";
 import Header from "components/Headers/Header.js";
 import style from "views/pages/DashBoard/style";
 import {Calendar, momentLocalizer} from 'react-big-calendar'
 import moment from 'moment'
 import axios from "axios"
+import './style.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { az } from "date-fns/locale";
 
@@ -20,6 +23,9 @@ const Reservation = () => {
 
   const [day, setDay] = useState({dateObj});
 
+  const [fullyear, setFullyear] = useState();
+  const [month, setMonth] = useState();
+
   const [error, setError]=useState();
   const [loading, setLoading]=useState();
 
@@ -28,25 +34,42 @@ const Reservation = () => {
 
   const [reservations, setReservations] = useState([]);
   
-  const [selectedDate, setSelectedDate] = useState();
+  //const [selectedDate, setSelectedDate] = useState();
+  const [selectedyear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedmonth, setSelectedMonth] = useState(("0" + (new Date().getMonth()+1).toString().slice(-2)));
+  const [selecteddate, setSelectedDate] = useState(new Date().getDate());
+
+  const [selectedslot, setSelectedSlot] = useState([]);
+
+  const [caldata, setCaldata] = useState([]);
+
+  const [culture, setCulture] = useState('kr')
 
   const location = useLocation();
   const history = useHistory();
 
   let room=[];
+  let res=[];
+
   let remap=null;
 
   let today = new Date();
 
   let format ={
+    eventTimeRangeFormat:() =>{
+      return null;
+    },
     timeGutterFormat: (date, culture, localizer) => 
           localizer.format(date, 'H:mm', culture),
   }
 
   const onSelectDate = (date) => {
     const newDate= new Date(date);
+    console.log(newDate);
     setDay(newDate);
-    console.log("day: ",day)
+    setSelectedYear(newDate.getFullYear());
+    setSelectedMonth(("0" + (newDate.getMonth()+1).toString().slice(-2)));
+    setSelectedDate(newDate.getDate());
   }
 
   /*const onSelectEvent = function(pEvent) {
@@ -80,68 +103,135 @@ const Reservation = () => {
 
   const ResourceMap = () => {
     let roomroom=[];
+    let roomcategory=[];
+    let roomrooms=[];
     try{
-      //console.log("리소스맵 세팅 단계 진입");
       for(var i=0 ; i<room.length ; i++){
-        for(var j=0 ; j< room[i].roomIdx.length ; j++){
-          //console.log(room[i].roomIdx[j]+ " "+room[i].roomName+room[i].roomIdx[j]);
-          console.log(room[i].roomType+" "+room[i].roomIdx[j]);
-          roomroom.push({resourceId: parseInt(room[i].roomIdx[j]), resourceTitle: room[i].roomType + room[i].roomIdx[j]});
+        roomroom.push({resourceId: parseInt(room[i].roomIdx), resourceTitle: room[i].roomName, resourceCategory: room[i].roomType});
+        if(roomcategory.includes(room[i].roomType)==false){
+          roomcategory.push(room[i].roomType);
+          //roomrooms.push(room[i].roomType)
         }
       }
+      for(var i=0 ; i<roomcategory.length ; i++){
+        //roomroom.push({resourceId: parseInt(room[i].roomIdx), resourceTitle: room[i].roomName, resourceCategory: room[i].roomType});
+        for(var j=0 ; j<roomroom.length ; j++){
+          if(roomroom[j].roomType==roomcategory[i]){
+            roomrooms.push({resourceId: parseInt(roomroom[i].roomIdx), resourceTitle: roomroom[i].roomName});
+          }
+        }
+      }
+      console.log(roomcategory);
+      console.log(roomrooms);
       setResourceMap(roomroom);
-      //console.log(resourcemap);
-      //console.log("리소스맵 세팅 단계 종료");
     } catch (e){
       console.log(e);
     }
   }
-  const fetchData = useCallback(async () =>{
-    try {
+
+  const ReserveData = () => {
+    //setEventDb([]);
+    let reserv=[];
+    try{
+      for(var i=0 ; i<res.length;i++){
+        let roomname="";
+        for(var j=0;j<resourcemap.length;j++){
+          if(resourcemap[j].resourceId == res[i].roomIdx){
+            roomname=resourcemap[j].resourceCategory;
+            break;
+          }
+        }
+        reserv.push({
+          title: res[i].request,
+          id: 1,
+          start: new Date(res[i].reservationTime)
+          ,end: new Date(res[i].endTime),
+          resourceId: res[i].roomIdx,
+          data:{
+            numberOfGame: res[i].numberOfGame,
+            personCount: res[i].personCount,
+            reservationIdx: res[i].reservationIdx,
+            reservationPrice: res[i].reservationPrice,
+            selectedHall: res[i].selectedHall,
+            useTime: res[i].useTime,
+            resquest: res[i].request,
+            roomname: roomname
+          },
+        });
+      }
+      console.log("asdf");
+      console.log(reserv);
+      setEventDb(reserv);
+    } catch(e){
+      console.log(e);
+    }
+  }
+
+  useEffect(()=>{
+    const fetchDate = async() =>{
+      try{
+        console.log(selectedyear + " " + selectedmonth + " " + selecteddate);
+        const reserve = await axios.get("/reservation-management/reservations/day?reservationDay="+selectedyear+"-"+selectedmonth+"-"+selecteddate);
+        console.log(reserve.data.result);
+        res=reserve.data.result;
+        
+        //setReservations(reserve.data.result);
+        //console.log(reservations);
+        ReserveData();
+      }catch(e){
+        console.log(e);
+        setError(e);
+      }
+    setLoading(false);
+    }
+    fetchDate();
+  },[selecteddate]);
+
+  useEffect(()=>{
+    const fetchData = async() =>{
+      try {
+        //console.log("THISYEARMONTH");
+        console.log(selectedyear+ " "+selectedmonth);
         setError(null);
         setLoading(true);
         setRooms(null);
         setReservations(null);
 
-         //const refund = await axios.get("/pay/refund-list");
+        //const refund = await axios.get("/pay/refund-list");
         //setRefunds(refund.data.result);
 
-        const roomidx = await axios.get("/stores/roomIdx?storeIdx=1");
+        const storeinfo = await axios.get("/partner/get_storeIdx");
+        console.log(storeinfo.data.result);
+        let stidx = storeinfo.data.result.storeIdx;
+        console.log("Storeindex: "+stidx);
+
+        const roomidx = await axios.get("/stores/roomName?storeIdx="+stidx);
         console.log(roomidx.data.result);
         room=roomidx.data.result;
         setRooms(roomidx.data.result);
-        console.log(rooms);
+        //console.log(rooms);
         
         //console.log("fetchData");
         ResourceMap();
 
-        const reserve = await axios.get("/reservation-management/reservations/day?reservationDay=2022-01-10");
-        console.log(reserve.data.result);
-        setReservations(reserve.data.result);
-
-        console.log(reservations);
-        
-
-        //newEvents.push({title: "테스트입니다", roomIdx: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
-        setEventDb([]);
-        newEvents.push({id: 1, title: "asdf", start: new Date('2022-04-03T14:30:00'), end: new Date('2022-04-03T18:30:00'), resourceId: 1});
-        newEvents.push({id: 2, title: "asdf", start: new Date('2022-04-03T20:30:00'), end: new Date('2022-04-03T22:30:00'), resourceId: 2});
-        //newEvents.push({title: "테스트입니다", id: 3, roomNAme: 3,start: new Date('2022-03-29T14:30:00'),end: new Date('2022-03-29T18:30:00')}); 
-        //setEventDb(eventDb => [...eventDb,{title: state.title, id: state.id, resourceId: state.resourceId,start: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourStart,state.minuteStart,state.secondStart),end: new Date(state.yearStart,state.monthStart,state.dayStart,state.hourEnd,state.minuteEnd,state.secondEnd)}]);          
-        setsmallEventDb({title: reserve.data.result.length+"건", id:1, start: new Date('2022-04-10T14:30:00'),end: new Date('2022-04-10T18:30:00'), resourceId: 1});
-        setEventDb(eventDb => [...eventDb,{title: "asdf", id: 1, start: new Date('2022-04-04T14:30:00'),end: new Date('2022-04-04T18:30:00'), resourceId: 35}]);
+        let caldt =null;
+        console.log(selectedyear + " "+selectedmonth);
+        console.log(" ↑ 해, 달");
+        caldt = await axios.get("/reservation-management/reservations/month?date="+selectedyear+"-"+selectedmonth);
+        console.log(caldt.data.result);
+        console.log(" ↑ 로딩 시 달력 리스트");        
+        caldt.data.result.map(d=>{
+          setCaldata(prev=>[...prev,{'title': d.cntReservation + "건", 'start': new Date(d.date), 'end': new Date(d.date)}]);
+        });
         console.log("fetchData끝");
-
     } catch (e){
         console.log(e);
         setError(e);
     }
     setLoading(false);
-  });
-
-  useEffect(()=>{
+    };
     fetchData();
-  },[]);
+  },[selectedyear, selectedmonth]);
 
   const onRefund=e=>{
   const re= 
@@ -154,6 +244,46 @@ console.log(re);
     console.log(response);  
   });
 //  window.location.reload();
+}
+
+useEffect(()=>{
+  const fetchslotinfo = () =>{
+    try{
+      return(
+        <>
+          <h1>asdf</h1>
+          <h2>eee</h2>
+        </>
+      )
+    }catch(e){
+      console.log(e);
+      setError(e);
+    }
+  setLoading(false);
+  }
+  fetchslotinfo();
+},[selectedslot]);
+
+const handleSelect = e => {
+  console.log(e);
+}
+
+const handleSelectEvent = (data) => {
+  console.log(data);
+  setSelectedSlot(data);
+  //reservationInfo(data);
+}
+
+//useEffect
+//useCallback(
+  //(event) => window.alert(event.title),
+//  []
+function makeChips(){
+  return(
+    <div>
+      <p>asdf</p>
+    </div>
+  )
 }
 
 function makeBigCalendar(){
@@ -178,13 +308,15 @@ function makeBigCalendar(){
       resourceIdAccessor="resourceId"
       resourceTitleAccessor="resourceTitle"
       culture={moment.locale('ko-KR')}
-      //onSelectSlot={handleSelect}
+      onSelectEvent={handleSelectEvent}
+      //onSelectSlot={handleSelectSlot}
       date={day}
       messages={{
         today: "오늘",
         previous: "<",
         next: ">",
       }}
+      style={{ height: 820 }}
       onNavigate={(date)=>{
         //console.log('#### date=',date)
         onSelectDate(date)
@@ -200,122 +332,142 @@ const onSelectEvent = (event) => {
   listenSlotClick();
 };
 
+const roomInfo = () =>{
+  let d_dt=null;
+  try{
+    if(selectedslot.length!=0){
+      console.log(selectedslot);
+      return(
+        <>
+          <span>{selectedslot.data.roomname}</span>
+        </>
+      )
+    }
+    else{
+      return(
+        <>
+          <span>　</span>
+        </>
+      )
+    }
+  } catch(e){
+    console.log(e);
+  }
+}
+
+const reservationInfo = () =>{
+  let d_dt=null;
+  try{
+    if(selectedslot.length!=0){
+      console.log(selectedslot);
+      return(
+        <div style={{whiteSpace: 'pre-wrap', overflowWrap: 'break-word'}}>
+          <p className="h4 font-weight-bold m-2">예약번호 : {selectedslot.data.reservationIdx}</p>
+          <p className="h4 font-weight-bold m-2">예약시간 : {selectedslot.start.getFullYear()}년 {selectedslot.start.getMonth()+1}월 {selectedslot.start.getDate()}일 {selectedslot.start.getHours()}:{("0" + selectedslot.start.getMinutes()).toString().slice(-2)}</p>
+          <p className="h4 font-weight-bold m-2">이용시간 : {selectedslot.data.useTime}분</p>
+          <p className="h4 font-weight-bold m-2">게임 수　: {selectedslot.data.numberOfGame}회</p>
+          <p className="h4 font-weight-bold m-2">인원 수　: {selectedslot.data.personCount}명</p>
+          <p className="h4 font-weight-bold m-2">홀　 수　: {selectedslot.data.selectedHall}번 홀</p>
+          <p className="h4 font-weight-bold m-2">이용요금 : {selectedslot.data.reservationPrice}원</p>
+          <p className="h4 font-weight-bold m-2">요청사항 : {selectedslot.data.resquest}</p>
+        </div>
+      )
+    }
+    else{
+      return(
+        <>
+        <p className="h4 font-weight-bold m-2">예약번호 : </p>
+        <p className="h4 font-weight-bold m-2">예약시간 : </p>
+        <p className="h4 font-weight-bold m-2">이용시간 : </p>
+        <p className="h4 font-weight-bold m-2">게임 수　: </p>
+        <p className="h4 font-weight-bold m-2">인원 수　: </p>
+        <p className="h4 font-weight-bold m-2">홀　 수　: </p>
+        <p className="h4 font-weight-bold m-2">이용요금 : </p>
+        <p className="h4 font-weight-bold m-2">요청사항 : </p>
+      </>
+      )
+    }
+  } catch(e){
+    console.log(e);
+  }
+}
+
 const listenSlotClick = (event) => {
 };
 
   return (
     <>
       <Header />
-
         <Container fluid>
-
           <Card className="card-stats mb-4 mb-xl-0 col-md-30 col-sm-60 h-100">
-
             <Row>
-
-              <Col xl="8">
-                {makeBigCalendar()}
+              <Col lg="12" xl="8">
+                <Card className="mb-0 shadow">
+                  <CardBody>
+                    {makeChips()}
+                  </CardBody>
+                </Card>
+                <Card className="mb-0 shadow">
+                  <CardBody>
+                    {makeBigCalendar()}
+                  </CardBody>
+                </Card>
               </Col>
-
               <Col>
-
                 <Row>
-                  
-                  <Col lg="10" xl="12">
-                    
-                    {/* 타석 종류 */}
-                    <Card className="card-stats mb-4 mb-xl-10 col-md-30 col-sm-60">
-                    
-                      <CardBody className="bg-primary">
-                    
-                        <div className="col">
-                      
-                          <CardTitle
-                            tag="h1"
-                            className="text-uppercase mb-0"
-                          >
-                            타석 종류
-                          </CardTitle>
-                      
-                        </div>
-                      
-                      </CardBody>
-  
+                  <Col lg="12" xl="14">
+                    <Card className="mb-1 shadow">
+                      <CardHeader className="bg-info">
+                        <CardTitle tag="h3" className="mb-0">타석 종류</CardTitle>
+                      </CardHeader>
                       <CardBody>
-  
                         <Row>
-  
                           <div>
-  
-                            <p>타석 종류 표시란</p>
-  
+                            <p className="h4 font-weight-bold m-2">{roomInfo()}</p>
                           </div>
-  
                         </Row>
-  
                       </CardBody>
-  
                     </Card>
-  
                   </Col>
-  
-                  <Col>
-
-                    <Calendar
-                      //작은캘린더
-                      events={smalleventDb}
-                      localizer={localizer}
-                      defaultView={'month'}
-                      views ={['month']}
-                      timeslots={4}
-                      step={15}
-                      defaultDate={new Date()}
-                      formats={format}
-                      //onSelectEvent = {event => onSelectEvent(event)}
-                      min={new Date(today.getFullYear(),today.getMonth(), today.getDate(), 0)}
-                      max={new Date(today.getFullYear(), today.getMonth(), today.getDate(), 23)}
-                      culture={moment.locale('ko-KR')}
-                      messages={{
-                        today: "오늘",
-                        previous: "<",
-                        next: ">",
-                      }}
-                      style={{ height: 320 }}
-                      //selectable={true}
-                      onNavigate={(date)=>{
-                        //console.log('#### date=',date)
-                        onSelectDate(date)
-                      }}
-                      onSelectEvent={(smalleventDb)=>{
-                        onSelectDate(smalleventDb.start)
-                      }}
-                    />              
-                  </Col>
-                
-                  <Col lg="10" xl="12">
-                  
-                  {/* 예약 상세 내용 */}
-                    <Card className="card-stats mb-4 mb-xl-10 col-md-30 col-sm-60">
-                      
-                      <CardBody className="bg-primary">
-                      
-                        <div className="col">
-                      
-                          <CardTitle
-                            tag="h1"
-                            className="text-uppercase mb-0"
-                          >
-                          
-                          예약 상세 내용
-                          </CardTitle>
-                      
-                        </div>
-                      
+                </Row>
+                <Row>  
+                  <Col lg="12" xl="12">
+                    <Card className="mb-1 shadow">
+                      <CardBody>
+                        <Calendar
+                          //작은캘린더
+                          events={caldata} 
+                          localizer={localizer}
+                          defaultView={'month'}
+                          views ={['month']}
+                          timeslots={4}
+                          step={15}
+                          defaultDate={new Date()}
+                          formats={format}
+                          culture={moment.locale('ko-KR')}
+                          messages={{
+                            today: "오늘",
+                            previous: "<",
+                            next: ">",
+                          }}
+                          style={{ height: 320 }}
+                          onNavigate={(date)=>{onSelectDate(date)}}
+                          onSelectEvent={(smalleventDb)=>{onSelectDate(smalleventDb.start)}}
+                        />    
                       </CardBody>
+                    </Card>
+                  </Col>
+                </Row>
+                <Row>
+                  <Col lg="12" xl="12">
+                    <Card className="shadow ">
+                      <CardHeader className="bg-info">
+                        <CardTitle tag="h3" className="mb-0">예약 상세 내용</CardTitle>
+                      </CardHeader>
                       <CardBody>
                         <Row>
                           <div>
-                            <p>예약 상세 내용란</p>
+                            {reservationInfo()}
                           </div>
                         </Row>
                       </CardBody>
@@ -324,17 +476,8 @@ const listenSlotClick = (event) => {
                 </Row>
               </Col>
             </Row>
-            <CardBody>
-            </CardBody>
-            <CardBody
-              style={{height: 300}}>
-              asdf
-            </CardBody>
-
           </Card>
-
         </Container>
-
     </>
   );
 };
