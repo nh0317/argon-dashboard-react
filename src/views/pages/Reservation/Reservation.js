@@ -11,15 +11,16 @@ import axios from "axios"
 import './style.css';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
 import { az } from "date-fns/locale";
+import { ListItem } from "@mui/material";
 
-const newEvents = [];
+//const newEvents = [];
 const dateObj=new Date();
 let sw=0;
 
 const Reservation = () => {
 
   const [eventDb, setEventDb] = useState([]);
-  const [smalleventDb, setsmallEventDb] = useState([]);
+  //const [smalleventDb, setsmallEventDb] = useState([]);
 
   const [day, setDay] = useState({dateObj});
 
@@ -39,19 +40,15 @@ const Reservation = () => {
   const [selectedmonth, setSelectedMonth] = useState(("0" + (new Date().getMonth()+1).toString().slice(-2)));
   const [selecteddate, setSelectedDate] = useState(new Date().getDate());
 
-  const [selectedslot, setSelectedSlot] = useState([]);
-
   const [caldata, setCaldata] = useState([]);
 
-  const [culture, setCulture] = useState('kr')
-
-  const location = useLocation();
-  const history = useHistory();
+  const [category, setCategory] = useState();
+  const [selected, setSelected] = useState();
+  const [selectedTF, setSelectedTF] = useState(true);
+  const [selectedslot, setSelectedSlot] = useState([]);
 
   let room=[];
   let res=[];
-
-  let remap=null;
 
   let today = new Date();
 
@@ -72,21 +69,6 @@ const Reservation = () => {
     setSelectedDate(newDate.getDate());
   }
 
-  /*const onSelectEvent = function(pEvent) {
-    const r = window.confirm("Weet je zeker dat je de afspraak wilt verwijderen?'")
-    if(r === true){
-      //const idx = indexOf(pEvent)
-      console.log(pEvent);
-      var ref = Firebase.database().ref('events');
-      ref.orderByChild('id').equalTo(pEvent.id).on('child_added', (snapshot) => {
-      snapshot.ref.remove()
-      });
-
-      setEventDb(eventDb.filter(item => item.id !== pEvent.id));
-
-
-    }
-  }*/
   const ColoredDateCellWrapper = ({ children }) =>
   React.cloneElement(React.Children.only(children), {
     style: {
@@ -101,29 +83,44 @@ const Reservation = () => {
     window.location.reload();
   }
 
+  useEffect(() => {
+    let roomroom=[];
+    //console.log(selected);
+    //console.log(rooms);
+    console.log("selected 변화 감지");
+    //console.log(rooms);
+    try{
+      for(var i=0;i<rooms.length;i++){
+        if(rooms[i].roomType==selected){
+          roomroom.push({resourceId: parseInt(rooms[i].roomIdx), resourceTitle: rooms[i].roomName, resourceCategory: rooms[i].roomType});
+        }
+      }
+      //console.log(roomroom);
+      setResourceMap(roomroom);
+    } catch(e){
+
+    }
+  },[selected])
+
   const ResourceMap = () => {
     let roomroom=[];
     let roomcategory=[];
     let roomrooms=[];
+    let cnt=0;
     try{
       for(var i=0 ; i<room.length ; i++){
         roomroom.push({resourceId: parseInt(room[i].roomIdx), resourceTitle: room[i].roomName, resourceCategory: room[i].roomType});
         if(roomcategory.includes(room[i].roomType)==false){
           roomcategory.push(room[i].roomType);
           //roomrooms.push(room[i].roomType)
+          cnt++;
         }
       }
-      for(var i=0 ; i<roomcategory.length ; i++){
-        //roomroom.push({resourceId: parseInt(room[i].roomIdx), resourceTitle: room[i].roomName, resourceCategory: room[i].roomType});
-        for(var j=0 ; j<roomroom.length ; j++){
-          if(roomroom[j].roomType==roomcategory[i]){
-            roomrooms.push({resourceId: parseInt(roomroom[i].roomIdx), resourceTitle: roomroom[i].roomName});
-          }
-        }
-      }
-      console.log(roomcategory);
-      console.log(roomrooms);
-      setResourceMap(roomroom);
+      //console.log(roomcategory);
+      //console.log(roomroom);
+      //setResourceMap(roomroom);
+      setRooms(room);
+      setCategory(roomcategory);
     } catch (e){
       console.log(e);
     }
@@ -132,12 +129,19 @@ const Reservation = () => {
   const ReserveData = () => {
     //setEventDb([]);
     let reserv=[];
+    console.log("RES");
+    console.log(res);
+    console.log("RESOURCEMAP");
+    console.log(resourcemap);
+    console.log(rooms);
     try{
       for(var i=0 ; i<res.length;i++){
         let roomname="";
-        for(var j=0;j<resourcemap.length;j++){
-          if(resourcemap[j].resourceId == res[i].roomIdx){
-            roomname=resourcemap[j].resourceCategory;
+        for(var j=0;j<rooms.length;j++){
+          if(rooms[j].roomIdx == res[i].roomIdx){
+            console.log("카테고리기입");
+            console.log(rooms[j].roomType);
+            roomname=rooms[j].roomType;
             break;
           }
         }
@@ -206,7 +210,7 @@ const Reservation = () => {
         console.log("Storeindex: "+stidx);
 
         const roomidx = await axios.get("/stores/roomName?storeIdx="+stidx);
-        console.log(roomidx.data.result);
+        //console.log(roomidx.data.result);
         room=roomidx.data.result;
         setRooms(roomidx.data.result);
         //console.log(rooms);
@@ -246,44 +250,60 @@ console.log(re);
 //  window.location.reload();
 }
 
-useEffect(()=>{
-  const fetchslotinfo = () =>{
-    try{
-      return(
-        <>
-          <h1>asdf</h1>
-          <h2>eee</h2>
-        </>
-      )
-    }catch(e){
-      console.log(e);
-      setError(e);
-    }
-  setLoading(false);
-  }
-  fetchslotinfo();
-},[selectedslot]);
-
-const handleSelect = e => {
-  console.log(e);
-}
-
 const handleSelectEvent = (data) => {
-  console.log(data);
+  //console.log("슬롯선택!");
+  //console.log(data);
   setSelectedSlot(data);
   //reservationInfo(data);
 }
 
-//useEffect
-//useCallback(
-  //(event) => window.alert(event.title),
-//  []
 function makeChips(){
-  return(
-    <div>
-      <p>asdf</p>
-    </div>
-  )
+  try{
+    let chipList=[];
+    if(category.length!=0){
+      for(var i=0;i<category.length;i++){
+        chipList.push({key:i+1, label: category[i]});
+      }
+    }
+    if(chipList.length!=0){
+      if(selected==null){
+        setSelected(chipList[0].label);
+        setSelectedTF(chipList[0].key);
+      }
+      return(
+        <>
+          <Stack direction="row" spacing={0}>
+            {
+              chipList.map((value) => {
+                return(
+                <ListItem key={value.key}>
+                  <Chip
+                    label={value.label}
+                    onClick={() => {
+                      setSelected(value.label)
+                      setSelectedTF(value.key)
+                    }}
+                    color={selected && value.key==selectedTF ? "primary" : "default"}
+                    id={`chip_${value.label}`}
+                  />
+                </ListItem>
+                )
+              })
+            }
+          </Stack>
+        </>
+      )
+    }
+    else{
+      return(
+        <>
+          <span>　</span>
+        </>
+      )
+    }
+  } catch(e){
+    console.log(e);
+  }
 }
 
 function makeBigCalendar(){
@@ -336,7 +356,8 @@ const roomInfo = () =>{
   let d_dt=null;
   try{
     if(selectedslot.length!=0){
-      console.log(selectedslot);
+      //console.log(selectedslot);
+      //console.log(selectedslot.data.roomname);
       return(
         <>
           <span>{selectedslot.data.roomname}</span>
@@ -346,7 +367,7 @@ const roomInfo = () =>{
     else{
       return(
         <>
-          <span>　</span>
+          <div>　</div>
         </>
       )
     }
@@ -359,7 +380,8 @@ const reservationInfo = () =>{
   let d_dt=null;
   try{
     if(selectedslot.length!=0){
-      console.log(selectedslot);
+      //console.log(selectedslot);
+
       return(
         <div style={{whiteSpace: 'pre-wrap', overflowWrap: 'break-word'}}>
           <p className="h4 font-weight-bold m-2">예약번호 : {selectedslot.data.reservationIdx}</p>
