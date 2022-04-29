@@ -1,11 +1,19 @@
 import React, {useCallback, useState, useEffect} from "react";
-import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, CardGroup,Table,Button } from "reactstrap";
+import { Card, CardBody, CardTitle, Container, Row, Col, CardHeader, CardGroup,Table,Button,CardFooter,
+
+  Pagination,
+  PaginationItem,
+  PaginationLink
+} from "reactstrap";
 import Header from "components/Headers/Header.js";
 import axios from "axios"
 
 const Refund = () => {
 
     const [refunds, setRefunds]=useState([]);
+    const [donePage, setDonePage]=useState(1);
+    const [donePageTotal, setDonePageTotal]=useState();
+
     const [refundsDone, setRefundsDone]=useState([]);
     const [error, setError]=useState();
     const [loading, setLoading]=useState();
@@ -17,10 +25,10 @@ const Refund = () => {
     
                  const d1 = await axios.get("/pay/refund-paging-list?status=Requesting");
                  setRefunds(d1.data.result.refunds);
-                     
-                 const d2 = await axios.get("/pay/refund-paging-list?status=Approved");
+                 
+                 const d2 = await axios.get(`/pay/refund-paging-list?status=Approved&page=${donePage}`);
                  setRefundsDone(d2.data.result.refunds);
-
+                 setDonePageTotal(d2.data.result.totalPage);
 
               } catch (e){
                 console.log(e);
@@ -29,7 +37,7 @@ const Refund = () => {
             setLoading(false);
         };
         fetchData();
-    },[]);
+    },[,donePage]);
     
     const onRefund=e=>{
       const re= 
@@ -37,14 +45,47 @@ const Refund = () => {
         "reservationIdx":Number(e.target.name),
         "cancelAmount":Number(e.target.value)
     };
-    console.log(re);
       axios.post("/pay/approve_refund",re).then(response => {
         console.log(response);  
+        window.location.reload();
       });
-    //  window.location.reload();
     }
     
-    
+    const List =()=>{
+      let count=[];
+      //최대 10page까지 표시
+      for(let i=1; i<=10 && i<=donePageTotal; i++)
+        count.push(i);
+      
+      return(
+        <CardFooter>
+        <Pagination
+               className="pagination justify-content-center"
+               listClassName="justify-content-center"             
+        >
+          {count.map(c=>
+            c==donePage?
+    <PaginationItem className="active">
+         <PaginationLink
+                   style={{"cursor": "default"}}  
+         >
+            {c}
+          </PaginationLink>
+          </PaginationItem>
+          :
+          <PaginationItem className="disabled"
+          style={{"cursor": "pointer"}}  
+          value={c}
+            onClick={(e) => setDonePage(e.target.value)}>
+          <PaginationLink>
+            {c}
+          </PaginationLink>
+         </PaginationItem>)}
+        </Pagination>
+    </CardFooter>
+      )
+    }
+
       return (
         <>
           <Header />
@@ -140,6 +181,7 @@ const Refund = () => {
                     )}
                 </tbody>
               </Table>
+              <List/>
             </Card>
           </div>
         </Row>
