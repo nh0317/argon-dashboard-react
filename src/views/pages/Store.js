@@ -51,6 +51,7 @@ const Store = () => {
             const idx= i.data.result.storeIdx;
             const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
             setRoomData(d2.data.result);
+            console.log(d2)
             d2.data.result.map(d=>{
             setBc(prev=>prev+d.roomIdx.length);
             });
@@ -211,7 +212,7 @@ const Store = () => {
                   <th style={{"width":"5%"}}>방 종류</th><th style={{"width":"5%"}}>개수</th><th>방 현황 (idx)</th>
                 </thead>
                 <tbody>
-                  {roomData.map(d=>
+                  {roomData? roomData.map(d=>
                      <tr>
                      <th>
                     {d.roomType}
@@ -231,7 +232,7 @@ const Store = () => {
                        )}
                      </td>
                    </tr>
-                    )}
+                    ):null}
                
                 </tbody>
               </Table>
