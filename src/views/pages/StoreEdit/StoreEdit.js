@@ -236,7 +236,6 @@ const onSubmit =event =>{
   "storeLocation": lc,
   "storeTime": startTime+" ~ "+endTime,
   "storeImage": [],
-  "batCount": bc,
   "lefthandStatus": lhs?lhs:false,
   "parkingStatus": ps?ps:false,
   "groupSeatStatus": gs?gs:false,
@@ -486,7 +485,7 @@ onChange={e=>onETime(e)}
                 <th style={{"width":"5%"}}>방 종류</th><th style={{"width":"5%"}}>개수</th><th>방 현황 (idx)</th>
                 </thead>
                 <tbody>
-                  {roomData.map(d=>
+                  {roomData? roomData.map(d=>
                      <tr>
                      <th>
                     {d.roomType}
@@ -511,7 +510,7 @@ onChange={e=>onETime(e)}
                        )}
                      </td>
                    </tr>
-                    )}
+                    ):null}
                
                 </tbody>
               </Table>
