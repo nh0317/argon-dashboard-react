@@ -1,51 +1,51 @@
 import namor from 'namor'
-import React, { useEffect,useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from "axios";
 
-const range = len => {
-  const arr = []
-  for (let i = 0; i < len; i++) {
-    arr.push(i)
-  }
-  return arr
-}
+const newPerson = async (status, props) => {
 
-const newPerson = async () => {
-  const statusChance = Math.random()
-  const arr = await axios.get("/calculate-management/calculation").then(res=>res.data.result)
+  let arr
+  if (props.time1value == "")
+    arr = await axios.get("/calculate-management/calculation").then(res => res.data.result)
+  else
+  status=="정산 완료"?
+    arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=1`).then(res => res.data.result):
+    arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=0`).then(res => res.data.result)
 
-  const data = arr.map(v => ({
-    cel1: v.sales,
-    cel2: v.fees,
-    cel3: v.price,
-    cel4: v.calculateStatus,
-    cel5: v.sales,
-    cel6: v.price,
+
+  const data = arr.filter(v => v.calculateStatus == status).map(v => ({
+    cel0: v.partnerPaymentIdx,
+    cel1: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel2: v.fees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel3: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel4: 0,
+    cel5: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel6: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     cel7: v.calculateStatus,
     cel8: v.createdAt,
     cel9: v.calculatedAt,
-    status:
-        statusChance > 0.66
-            ? 'relationship'
-            : statusChance > 0.33
-            ? 'complicated'
-            : 'single',
   }))
 
   return data
 }
 
-export default async function makeData(...lens) {
+export default async function makeData(props, ...lens) {
   const makeDataLevel = async (depth = 0) => {
-    //const len = lens[depth]
-    const data = await newPerson()
-    console.log(data)
-    return data.map(d => {
+    const data = await newPerson("정산 미완료", props)
+    const data2 = await newPerson("정산 완료", props)
+    return [data.map(d => {
       return {
         ...d,
         subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
       }
-    })
+    }),
+    data2.map(d => {
+      return {
+        ...d,
+        subRows: lens[depth + 1] ? makeDataLevel(depth + 1) : undefined,
+      }
+    })]
+
   }
 
   return await makeDataLevel()
