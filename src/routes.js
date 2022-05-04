@@ -24,7 +24,7 @@ import Tables from "views/examples/Tables.js";
 import Icons from "views/examples/Icons.js";
 
 import Reservation from "views/pages/Reservation/Reservation"
-import Price from "views/pages/Price.js"
+import Price from "views/pages/Price/Price.js"
 import Dashboard from "views/pages/DashBoard/DashBoard";
 import Calculate from "views/pages/Calculate/Calculate";
 import Store from "views/pages/Store.js";
