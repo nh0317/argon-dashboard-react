@@ -355,22 +355,7 @@ const Store = () => {
   <td> 
    X</td> } 
    </tr>
-   <tr >
-<th scope="row">
-      <span className="mb-0 text-sm">
-  쿠폰 여부
-      </span>
-</th>
-{data.couponStatus?
-  <td> 
-   O</td>:
-  <td> 
-   X</td> } 
-   </tr>
- 
-
-
-                  
+                
                 </tbody>
               </Table>
             </Card>

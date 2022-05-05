@@ -72,7 +72,13 @@ const PriceTable = (props) => {
         else {
             axios.post(`/price/register_price`, newData).then(response => {
                 console.log(response)
-            });
+                if (response.data.code == 2050)
+                    alert("영업시간 내의 시간을 입력해주세요.");
+                if (response.data.isSuccess==true){
+                    setReload(reload+1);
+                    setEIdx(null);
+                    setNewEdit(false);
+                }});
         }
     }
     const onPriceDel = e => {

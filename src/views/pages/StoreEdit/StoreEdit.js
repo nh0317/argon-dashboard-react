@@ -98,7 +98,6 @@ const StoreEdit = ( ) => {
             setGs(d.data.result.groupSeatStatus);
             setLs(d.data.result.lessonStatus);
             setRs(d.data.result.reserveStatus);
-            setCs(d.data.result.couponStatus);
            setLc(d.data.result.storeLocation);
            setMainImage(d.data.result.mainStoreImage);
 
@@ -713,35 +712,6 @@ onChange={e=>onETime(e)}
 </S.ReserveStatusContainer>
 </td>  
    </tr>
-   <tr >
-<th scope="row">
-      <span className="mb-0 text-sm">
-  쿠폰 여부
-      </span>
-</th>
-  <td> 
-    <S.ReserveStatusContainer>                     
-<S.RadioButton
-          type="radio"
-           name="cs"
-           defaultChecked={cs}
-           onClick={e=>setCs(true)}
-           />
-           <h3>O</h3>
-             
-           <S.RadioButton
-          type="radio"
-           name="cs"
-           defaultChecked={!cs}
-           onClick={e=>setCs(false)}     
-                 />
-                 <h3>X</h3>         
-</S.ReserveStatusContainer></td>
-   </tr>
- 
-
-
-                  
                 </tbody>
               </Table>
             </Card>
