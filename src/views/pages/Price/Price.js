@@ -45,6 +45,8 @@ const Price = () => {
               const c = await axios.get(`/stores/coupons?storeIdx=${idx}`);
               setHoli(h.data.result);
               setWeek(w.data.result);
+              console.log(c2)
+              console.log(c2_)
               setCost(c1.data.result.filter(c=>c.hole==9));
               setCost_(c1_.data.result.filter(c=>c.hole==9));
               setCost18(c1.data.result.filter(c=>c.hole==18));
@@ -54,6 +56,7 @@ const Price = () => {
               setCostPeriod18(c2.data.result.filter(c=>c.hole==18));
               setCostPeriod_18(c2_.data.result.filter(c=>c.hole==18));
               setCoupon(c.data.result);
+              setReload(0);
           } catch (e){
               console.log(e);
               setError(e);
@@ -69,7 +72,7 @@ const Price = () => {
       <Header />
       <br/> <br/> <br/> <br/> <br/> <br/>
       <Container className="mt--7" fluid>
-      <DayMenu holi={holi} setHoli={setHoli} week={week} setWeek={setWeek} reload={reload} setReload={setReload} />
+      <DayMenu holi={holi}  week={week}  reload={reload} setReload={setReload} />
       <PriceTable costHoli={cost18} cost={cost_18} reload={reload} setReload={setReload} hole={18}/>
       <PriceTable costHoli={cost} cost={cost_} reload={reload} setReload={setReload} hole={9}/>
       <PriceTable costHoli={costPeriod18} cost={costPeriod_18} reload={reload} setReload={setReload} hole={18} special={true}/>

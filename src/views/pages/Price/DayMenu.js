@@ -14,9 +14,7 @@ import {
 const DayMenu = (props) => {
 
     const holi = props.holi;
-    const setHoli = props.setHoli;
     const week = props.week;
-    const setWeek = props.setWeek;
     
     const reload = props.reload;
     const setReload = props.setReload;
