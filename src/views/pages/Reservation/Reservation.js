@@ -37,8 +37,8 @@ const Reservation = () => {
   
   //const [selectedDate, setSelectedDate] = useState();
   const [selectedyear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedmonth, setSelectedMonth] = useState(("0" + (new Date().getMonth()+1).toString().slice(-2)));
-  const [selecteddate, setSelectedDate] = useState(("0" + (new Date().getDate().toString().slice(-2))));
+  const [selectedmonth, setSelectedMonth] = useState((("0" + (new Date().getMonth()+1)).toString().slice(-2)));
+  const [selecteddate, setSelectedDate] = useState((("0" + new Date().getDate()).toString().slice(-2)));
 
   const [caldata, setCaldata] = useState([]);
 
@@ -63,10 +63,11 @@ const Reservation = () => {
   const onSelectDate = (date) => {
     const newDate= new Date(date);
     console.log(newDate);
+    let s_date = ("0" + newDate.getDate()).toString().slice(-2);
     setDay(newDate);
     setSelectedYear(newDate.getFullYear());
-    setSelectedMonth(("0" + (newDate.getMonth()+1).toString().slice(-2)));
-    setSelectedDate(("0" + (newDate.getDate()).toString().slice(-2)));
+    setSelectedMonth((("0" + (newDate.getMonth()+1)).toString().slice(-2)));
+    setSelectedDate((("0" + newDate.getDate()).toString().slice(-2)));
   }
 
   const ColoredDateCellWrapper = ({ children }) =>
