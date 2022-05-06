@@ -38,7 +38,7 @@ const Reservation = () => {
   //const [selectedDate, setSelectedDate] = useState();
   const [selectedyear, setSelectedYear] = useState(new Date().getFullYear());
   const [selectedmonth, setSelectedMonth] = useState(("0" + (new Date().getMonth()+1).toString().slice(-2)));
-  const [selecteddate, setSelectedDate] = useState(new Date().getDate());
+  const [selecteddate, setSelectedDate] = useState(("0" + (new Date().getDate().toString().slice(-2))));
 
   const [caldata, setCaldata] = useState([]);
 
@@ -66,7 +66,7 @@ const Reservation = () => {
     setDay(newDate);
     setSelectedYear(newDate.getFullYear());
     setSelectedMonth(("0" + (newDate.getMonth()+1).toString().slice(-2)));
-    setSelectedDate(newDate.getDate());
+    setSelectedDate(("0" + (newDate.getDate()).toString().slice(-2)));
   }
 
   const ColoredDateCellWrapper = ({ children }) =>
@@ -139,8 +139,8 @@ const Reservation = () => {
         let roomname="";
         for(var j=0;j<rooms.length;j++){
           if(rooms[j].roomIdx == res[i].roomIdx){
-            console.log("카테고리기입");
-            console.log(rooms[j].roomType);
+            //console.log("카테고리기입");
+            //console.log(rooms[j].roomType);
             roomname=rooms[j].roomType;
             break;
           }
@@ -302,7 +302,7 @@ function makeChips(){
       )
     }
   } catch(e){
-    console.log(e);
+    //console.log(e);
   }
 }
 
