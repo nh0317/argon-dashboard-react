@@ -105,13 +105,11 @@ const Sidebar = (props) => {
   
   const logout = () =>{
     axios.post('/users/logout').then(response => {
-        console.log(response);
+      if(response.data.isSuccess){
         alert("로그아웃 되었습니다.");
-
         history.push("/auth/signin");
-        window.location.reload();
-
-        });
+      }  
+      });
 }
 
   return (
