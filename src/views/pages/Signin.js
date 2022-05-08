@@ -52,7 +52,7 @@ import {
       console.log(e);
   }}
   const onSilentRefresh = async () => {
-      let response = await axios.post('/users/refresh');
+      let response = await axios.post('/partner/refresh');
       console.log("refresh now");
       onLoginSuccess(response);
   }

@@ -67,14 +67,14 @@ const Dashboard = () => {
 
               const i = await axios.get("/partner/get_storeIdx");
               if(i.data.code==3015) setIfNew(true);
-              else if(i.data.code==3010 ){ //모바일 계정인 경우
-                axios.post('/users/logout').then(response => {
-                  console.log(response);
-                  alert("로그아웃 되었습니다.");
-                  history.replace("/auth/signin");
-                  window.location.reload();
-                  });
-                }
+              // else if(i.data.code==3010 ){ //모바일 계정인 경우
+              //   axios.post('/users/logout').then(response => {
+              //     console.log(response);
+              //     alert("로그아웃 되었습니다.");
+              //     history.replace("/auth/signin");
+              //     window.location.reload();
+              //     });
+              //   }
 
               const d = await axios.get("/dashboard/today-sales");
               setDayData(d.data.result);

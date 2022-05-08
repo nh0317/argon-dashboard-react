@@ -5,8 +5,16 @@ import AdminLayout from "layouts/Admin"
 
 function PrivateRoute ({ component: Component, ...rest }) {
     const history= useHistory();
-    axios.post('/users/refresh').then(response => {
+    axios.post('/partner/refresh').then(response => {
       if(response.data.isSuccess){
+      }
+      else if(response.data.code==403){
+        axios.post('/users/logout').then(response => {
+            console.log(response);
+            alert("로그아웃 되었습니다.");
+            history.replace("/auth/signin");
+            window.location.reload();
+            });
       }
       else{
 
