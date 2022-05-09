@@ -12,8 +12,8 @@ const newPerson = async (status, props) => {
     arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=1`).then(res => res.data.result):
     arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=0`).then(res => res.data.result)
 
-
-  const data = arr.filter(v => v.calculateStatus == status).map(v => ({
+ 
+  const data = arr?arr.filter(v => v.calculateStatus == status).map(v => ({
     cel0: v.partnerPaymentIdx,
     cel1: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     cel2: v.fees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
@@ -24,7 +24,7 @@ const newPerson = async (status, props) => {
     cel7: v.calculateStatus,
     cel8: v.createdAt,
     cel9: v.calculatedAt,
-  }))
+  })):[]
 
   return data
 }
