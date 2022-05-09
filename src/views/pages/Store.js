@@ -55,8 +55,11 @@ const Store = () => {
             setBc(prev=>prev+d.roomIdx.length);
             });
             }
+            else{
+              setError(-1);
+            }
         } catch (e){
-            setError(e);
+            console.log(e);
         }
         setLoading(false);
     };
@@ -69,7 +72,7 @@ const Store = () => {
       <Header />
       {/* Page content */}
       <br/> <br/> <br/> <br/> <br/> <br/>
-      {data.storeName == null ?
+      {error==-1 ?
         <Container className="mt--7" fluid>
           <Card className="card-stats mb-4 mb-xl-3">
             <CardBody>

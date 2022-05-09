@@ -6,12 +6,12 @@ const Post = (props) => {
   const setAddress = props.setAddress;
 
   const onCompletePost = (data) => {
-    console.log(data.address);
     setAddress(data.address);
   };
 
   const postCodeStyle = {
     display: "block",
+    margin: "0px 0px 0px 105px",
     position: "fixed",
     top: "30%",
     border: "1px solid grey",
