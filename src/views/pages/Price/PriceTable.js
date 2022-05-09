@@ -396,6 +396,7 @@ const PriceTable = (props) => {
                                             className="btn btn-secondary btn-sm"
                                             type="time"
                                             value={startTime}
+                                            defaultValue="00:00"
                                             onChange={e =>setST(e.target.value)}
                                         />
                                         ~
@@ -404,6 +405,7 @@ const PriceTable = (props) => {
                                             className="btn btn-secondary btn-sm"
                                             type="time"
                                             value={endTime}
+                                            defaultValue="00:00"
                                             onChange={e =>setET(e.target.value)}
                                         />
 
