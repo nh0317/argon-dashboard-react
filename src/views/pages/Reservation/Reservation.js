@@ -156,7 +156,7 @@ const Reservation = () => {
             numberOfGame: res[i].numberOfGame,
             personCount: res[i].personCount,
             reservationIdx: res[i].reservationIdx,
-            reservationPrice: res[i].reservationPrice,
+            reservationPrice: res[i].reservePrice,
             selectedHall: res[i].selectedHall,
             useTime: res[i].useTime,
             resquest: res[i].request,
@@ -381,7 +381,6 @@ const reservationInfo = () =>{
   let d_dt=null;
   try{
     if(selectedslot.length!=0){
-      //console.log(selectedslot);
 
       return(
         <div style={{whiteSpace: 'pre-wrap', overflowWrap: 'break-word'}}>

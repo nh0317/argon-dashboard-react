@@ -169,7 +169,7 @@ const Header = ( props ) => {
                           이번 달의 매출
                         </CardTitle>
                         <span className="h2 font-weight-bold m-2">
-                        {sales.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 원
+                        {msales.replace(/\B(?=(\d{3})+(?!\d))/g, ",")} 원
                         </span>
                       </div>
                       <Col className="col-auto mt-2 mb-2">
