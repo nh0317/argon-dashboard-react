@@ -6,7 +6,7 @@ import {
   Badge,
   Card,Col,
   CardHeader,
-  CardFooter,
+  CardBody,
   DropdownMenu,
   DropdownItem,
   UncontrolledDropdown,
@@ -42,22 +42,24 @@ const Store = () => {
         try {
             setError(null);
             setLoading(true);
-            
             const d1 = await axios.get("/partner/myStore");
             setData(d1.data.result);
-            console.log(d1);
-            setImages(d1.data.result.storeImage);
             const i = await axios.get("/partner/get_storeIdx");
-            const idx= i.data.result.storeIdx;
+            if(i.data.isSuccess){
+              console.log(d1);
+              setImages(d1.data.result.storeImage);
+              const idx= i.data.result.storeIdx;
             const d2 = await axios.get(`/stores/roomIdx?storeIdx=${idx}`);
             setRoomData(d2.data.result);
-            console.log(d2)
             d2.data.result.map(d=>{
             setBc(prev=>prev+d.roomIdx.length);
             });
-
+            }
+            else{
+              setError(-1);
+            }
         } catch (e){
-            setError(e);
+            console.log(e);
         }
         setLoading(false);
     };
@@ -70,6 +72,32 @@ const Store = () => {
       <Header />
       {/* Page content */}
       <br/> <br/> <br/> <br/> <br/> <br/>
+      {error==-1 ?
+        <Container className="mt--7" fluid>
+          <Card className="card-stats mb-4 mb-xl-3">
+            <CardBody>
+              <Row>
+                <div className="col">
+                  <div className="h3 font-weight-bold m-3">
+                    아직 매장을 등록하지 않으셨나요?
+
+                  </div>
+                  <NavLink to={{ pathname: "/admin/storeedit" }}
+                    tag={NavLinkRRD}
+                    activeClassName="active"
+                  >
+                    <Button
+                      className="mb-1"
+                      color="info">
+                      매장 등록하러 가기
+                    </Button>
+                  </NavLink>
+                </div>
+              </Row>
+            </CardBody>
+          </Card>
+        </Container>
+  :
       <Container className="mt--7" fluid>
         {/* Table */}
        <Row>
@@ -382,12 +410,7 @@ const Store = () => {
                정보 수정
               </Button>
               </NavLink>
-
-
-
-
-              
-                  </Container>
+                  </Container>}
     </>
   );
 };

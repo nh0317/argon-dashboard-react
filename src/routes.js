@@ -42,6 +42,20 @@ var routes = [
     layout: "/admin",
   },
   {
+    path: "/storeedit",
+    name: "매장 정보 설정",
+    icon: "ni ni-favourite-28",
+    component: StoreEdit,
+    layout: "/admin",
+  },
+  {
+    path: "/store",
+    name: "매장 관리",
+    icon: "ni ni-shop",
+    component: Store,
+    layout: "/admin",
+  },
+  {
     path: "/reservation",
     name: "예약 관리",
     icon: "ni ni-calendar-grid-58",
@@ -63,32 +77,10 @@ var routes = [
     layout: "/admin",
   },
   {
-    path: "/store",
-    name: "매장 관리",
-    icon: "ni ni-shop",
-    component: Store,
-    layout: "/admin",
-  },
-  {
-    path: "/storeedit",
-    name: "매장 정보 설정",
-    icon: "ni ni-favourite-28",
-    component: StoreEdit,
-    layout: "/admin",
-  },
-  
-  {
     path: "/price",
     name: "가격 관리",
     icon: "ni ni-money-coins",
     component: Price,
-    layout: "/admin",
-  },
-  {
-    path: "/review",
-    name: "후기 관리",
-    icon: "ni ni-favourite-28",
-    component: Review,
     layout: "/admin",
   },
   {
@@ -105,57 +97,5 @@ var routes = [
     component: Signup,
     layout: "/auth",
   },
-  /*
- 
-  {
-    path: "/icons",
-    name: "Icons - 참고용!",
-    icon: "ni ni-planet text-blue", // 색깔은 뒷부분에
-    component: Icons,
-    layout: "/admin",
-  },
-  {
-    path: "/index",
-    name: "Index - 참고용!",
-    icon: "ni ni-planet text-blue", // 색깔은 뒷부분에
-    component: Index,
-    layout: "/admin",
-  },
-  {
-    path: "/maps",
-    name: "Maps - 참고용!",
-    icon: "ni ni-pin-3 text-orange",
-    component: Maps,
-    layout: "/admin",
-  },
-  {
-    path: "/user-profile",
-    name: "User Profile - 참고용!",
-    icon: "ni ni-single-02 text-yellow",
-    component: Profile,
-    layout: "/admin",
-  },
-  {
-    path: "/tables",
-    name: "Tables - 참고용!",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: Tables,
-    layout: "/admin",
-  },
-  {
-    path: "/login",
-    name: "Login - 참고용!",
-    icon: "ni ni-key-25 text-info",
-    component: Login,
-    layout: "/auth",
-  },
-  {
-    path: "/register",
-    name: "Register - 참고용!",
-    icon: "ni ni-circle-08 text-pink",
-    component: Register,
-    layout: "/auth",
-  },
-  */
 ];
 export default routes;

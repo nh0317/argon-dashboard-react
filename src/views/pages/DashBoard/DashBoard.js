@@ -260,6 +260,7 @@ const onDelMemo=e=>{
                       endAccessor="end"
                       defaultDate={moment().toDate()}
                       localizer={localizer}
+                      toolbar={false}
                       style={{ height: 600 }}
                       onSelectEvent = {event => onSelectEvent(event)}
                     /> 
