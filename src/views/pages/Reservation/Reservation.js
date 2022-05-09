@@ -381,7 +381,6 @@ const reservationInfo = () =>{
   let d_dt=null;
   try{
     if(selectedslot.length!=0){
-      //console.log(selectedslot);
 
       return(
         <div style={{whiteSpace: 'pre-wrap', overflowWrap: 'break-word'}}>
