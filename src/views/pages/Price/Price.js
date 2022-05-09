@@ -38,8 +38,8 @@ const Price = () => {
               const idx= i.data.result.storeIdx;
                const c1 = await axios.get(`/price/${idx}/week_price?isHoliday=true`);
                const c1_ = await axios.get(`/price/${idx}/week_price?isHoliday=false`)
-               const c2 = await axios.get(`/price/${idx}/period_price?isHoliday=true`);
-               const c2_ = await axios.get(`/price/${idx}/period_price?isHoliday=false`);
+               const c2 = await axios.get(`/price/${idx}/period_price?isHoliday=true&all=true`);
+               const c2_ = await axios.get(`/price/${idx}/period_price?isHoliday=false&all=true`);
               const h = await axios.get("/price/week?isHoliday=true");
               const w = await axios.get("/price/week?isHoliday=false");
               const c = await axios.get(`/stores/coupons?storeIdx=${idx}`);
