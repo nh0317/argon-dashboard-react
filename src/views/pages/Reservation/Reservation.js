@@ -156,7 +156,7 @@ const Reservation = () => {
             numberOfGame: res[i].numberOfGame,
             personCount: res[i].personCount,
             reservationIdx: res[i].reservationIdx,
-            reservationPrice: res[i].reservationPrice,
+            reservationPrice: res[i].reservePrice,
             selectedHall: res[i].selectedHall,
             useTime: res[i].useTime,
             resquest: res[i].request,
