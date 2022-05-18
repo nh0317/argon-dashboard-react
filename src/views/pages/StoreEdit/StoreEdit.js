@@ -155,6 +155,9 @@ const StoreEdit = () => {
         alert("사진이 등록되었습니다.");
         setReload(reload +1);
         }
+        else if(response.data.code == 3040){
+          alert(response.data.message);
+        }
       });
     } catch (e) {
       console.log(e);
@@ -175,7 +178,11 @@ const StoreEdit = () => {
         if(response.data.isSuccess){
           alert("사진이 등록되었습니다.");
           setReload(reload +1);;
-      }});
+      }
+      else if(response.data.code == 3040){
+        alert(response.data.message);
+      }
+    });
     } catch (e) {
       console.log(e);
     }
