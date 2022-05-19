@@ -60,14 +60,17 @@ export function TableCal({ columns, data }) {
   })
 
   const onSubmit = (e) => {
-    axios.post(`/calculate-management/calculation?partnerPaymentIdx=${e.target.value}`).then(res=>console.log(res));
-    window.location.reload();
+    axios.post(`/calculate-management/calculation?partnerPaymentIdx=${e.target.value}`)
+    .then(res=>{
+      console.log(res)
+      window.location.reload()});
   }
   return (
     <Table {...getTableProps()}>
       <thead className="thead-light">
         <tr>
           <th rowSpan={2} colSpan={1}>idx</th>
+          <th rowSpan={2} colSpan={1}>정산 기간</th>
           <th rowSpan={2} colSpan={1}>매출</th>
           <th rowSpan={2} colSpan={1}>수수료</th>
           <th className="text-center" colsPan={2}>할인 쿠폰</th>
@@ -91,7 +94,7 @@ export function TableCal({ columns, data }) {
               {row.cells.map(cell => {
                 return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
               })}
-              {row.values.cel7 == "정산 미완료" ?
+              {row.values.cel8 == "정산 미완료" ?
                 <td><Button
                   value={row.values.cel0}
                   onClick={e => onSubmit(e)}

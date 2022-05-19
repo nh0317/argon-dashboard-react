@@ -12,18 +12,19 @@ const newPerson = async (status, props) => {
     arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=1`).then(res => res.data.result):
     arr = await axios.get(`/calculate-management/calculation-list?startDate=${props.time1value}&endDate=${props.time2value}&calculationStatus=0`).then(res => res.data.result)
 
- 
+
   const data = arr?arr.filter(v => v.calculateStatus == status).map(v => ({
     cel0: v.partnerPaymentIdx,
-    cel1: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel2: v.fees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel3: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel4: 0,
-    cel5: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel1: v.calculateDate+"-01 ~ "+v.calculateDate+"-"+new Date(v.calculateDate.split("-")[0],v.calculateDate.split("-")[1],0).getDate(),
+    cel2: v.sales.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel3: v.fees.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel4: v.couponDiscount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel5: v.pointDiscount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     cel6: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel7: v.calculateStatus,
-    cel8: v.createdAt,
-    cel9: v.calculatedAt,
+    cel7: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
+    cel8: v.calculateStatus,
+    cel9: v.createdAt,
+    cel10: v.calculatedAt,
   })):[]
 
   return data

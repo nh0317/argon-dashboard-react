@@ -55,7 +55,7 @@ const Calculate = () => {
             ],
         },
         {
-            Header: '매출',
+            Header: '정산 기간',
             columns: [
                 {
                     Header: '',
@@ -64,11 +64,20 @@ const Calculate = () => {
             ],
         },
         {
+            Header: '매출',
+            columns: [
+                {
+                    Header: '',
+                    accessor: 'cel2',
+                },
+            ],
+        },
+        {
             Header: '수수료',
             columns: [
                 {
                     Header: '수수료',
-                    accessor: 'cel2',
+                    accessor: 'cel3',
                 },
             ],
         },
@@ -77,11 +86,11 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '입점사 부담',
-                    accessor: 'cel3',
+                    accessor: 'cel4',
                 },
                 {
                     Header: '본사 부담',
-                    accessor: 'cel4',
+                    accessor: 'cel5',
                 },
             ],
         },
@@ -90,7 +99,7 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel5',
+                    accessor: 'cel6',
                 },
             ],
         },
@@ -99,7 +108,7 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel6',
+                    accessor: 'cel7',
                 },
             ],
         },
@@ -108,7 +117,7 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel7',
+                    accessor: 'cel8',
                 },
             ],
         },
@@ -117,7 +126,7 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel8',
+                    accessor: 'cel9',
                 },
             ],
         },
@@ -126,7 +135,7 @@ const Calculate = () => {
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel9',
+                    accessor: 'cel10',
                 },
             ],
         },
