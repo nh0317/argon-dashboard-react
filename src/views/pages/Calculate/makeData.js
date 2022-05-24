@@ -21,10 +21,9 @@ const newPerson = async (status, props) => {
     cel4: v.couponDiscount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     cel5: v.pointDiscount.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
     cel6: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel7: v.price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ","),
-    cel8: v.calculateStatus,
-    cel9: v.createdAt,
-    cel10: v.calculatedAt,
+    cel7: v.calculateStatus,
+    cel8: v.createdAt,
+    cel9: v.calculatedAt,
   })):[]
 
   return data

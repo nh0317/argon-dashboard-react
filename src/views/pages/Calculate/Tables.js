@@ -75,7 +75,6 @@ export function TableCal({ columns, data }) {
           <th rowSpan={2} colSpan={1}>수수료</th>
           <th className="text-center" colsPan={2}>할인 쿠폰</th>
           <th rowSpan={2} colSpan={1}>총 산정 금액</th>
-          <th rowSpan={2} colSpan={1}>정산 입금액</th>
           <th rowSpan={2} colSpan={1}>정산 상태</th>
           <th rowSpan={2} colSpan={1}>등록 일시</th>
           <th rowSpan={2} colSpan={1}>입금 일시</th>
@@ -94,7 +93,7 @@ export function TableCal({ columns, data }) {
               {row.cells.map(cell => {
                 return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>
               })}
-              {row.values.cel8 == "정산 미완료" ?
+              {row.values.cel7 == "정산 미완료" ?
                 <td><Button
                   value={row.values.cel0}
                   onClick={e => onSubmit(e)}

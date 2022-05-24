@@ -104,7 +104,7 @@ const Calculate = () => {
             ],
         },
         {
-            Header: '정산 입금액',
+            Header: '정산 상태',
             columns: [
                 {
                     Header: '',
@@ -113,7 +113,7 @@ const Calculate = () => {
             ],
         },
         {
-            Header: '정산 상태',
+            Header: '등록일시',
             columns: [
                 {
                     Header: '',
@@ -122,20 +122,11 @@ const Calculate = () => {
             ],
         },
         {
-            Header: '등록일시',
-            columns: [
-                {
-                    Header: '',
-                    accessor: 'cel9',
-                },
-            ],
-        },
-        {
             Header: '입금일시',
             columns: [
                 {
                     Header: '',
-                    accessor: 'cel10',
+                    accessor: 'cel9',
                 },
             ],
         },
