@@ -23,7 +23,7 @@
     "url": "https://github.com/creativetimofficial/argon-dashboard-react/issues"
   },
   "homepage": ".",
-  "proxy": "http://13.124.163.85:8080/",
+  "proxy": "https://13.124.163.85:8080/",
   "scripts": {
     "start": "export PORT=8083 && react-scripts start",
     "build": "react-scripts build",
